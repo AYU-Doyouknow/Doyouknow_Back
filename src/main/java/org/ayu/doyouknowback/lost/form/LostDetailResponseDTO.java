@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ayu.doyouknowback.lost.domain.Lost;
 
 @Data
 @Builder
@@ -17,4 +18,16 @@ public class LostDetailResponseDTO {
     private String lostDate;
     private int lostViews;
     private String lostBody;
+
+    public static LostDetailResponseDTO fromEntity(Lost lost){
+        return LostDetailResponseDTO.builder()
+                .id(lost.getId())
+                .lostTitle(lost.getLostTitle())
+                .lostDormitory(lost.getLostDormitory())
+                .lostLink(lost.getLostLink())
+                .lostDate(lost.getLostDate())
+                .lostViews(lost.getLostViews())
+                .lostBody(lost.getLostBody())
+                .build();
+    }
 }
