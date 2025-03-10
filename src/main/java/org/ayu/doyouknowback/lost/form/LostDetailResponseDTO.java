@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LostResponseDTO {
+public class LostDetailResponseDTO {
     private Long id;
     private String lostTitle;
     private String lostDormitory;
     private String lostLink;
     private String lostDate;
     private int lostViews;
+    private String lostBody;
 }
