@@ -21,6 +21,7 @@ public class Notice {
     private String noticeDormitory;
     private String noticeLink;
     private String noticeDate;
+    private String noticeCategory;
     private int noticeViews;
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
