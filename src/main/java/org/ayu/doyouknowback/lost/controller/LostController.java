@@ -5,6 +5,7 @@ import org.ayu.doyouknowback.lost.form.LostDetailResponseDTO;
 import org.ayu.doyouknowback.lost.form.LostRequestDTO;
 import org.ayu.doyouknowback.lost.form.LostResponseDTO;
 import org.ayu.doyouknowback.lost.service.LostService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +20,12 @@ public class LostController {
     private final LostService lostService;
 
     //데이터 전체 조회
-    @GetMapping("/all")
-    public ResponseEntity<List<LostResponseDTO>> getAllLost(){
-        List<LostResponseDTO> lostResponseDTOList = lostService.getAll();
+    @GetMapping("/all") // http://localhost:8080/lost/all?page=0&size=10
+    public ResponseEntity<Page<LostResponseDTO>> getAllLost(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id,desc") String sort){
+        Page<LostResponseDTO> lostResponseDTOList = lostService.getAll(page, size, sort);
         return ResponseEntity.status(HttpStatus.OK).body(lostResponseDTOList);
     }
 
