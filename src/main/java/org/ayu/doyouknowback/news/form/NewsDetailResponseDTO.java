@@ -1,6 +1,5 @@
 package org.ayu.doyouknowback.news.form;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class NewsRequestDTO {
+public class NewsDetailResponseDTO {
     private Long id;
     private String newsTitle;// 타이틀
     private String newsDormitory; //작성자

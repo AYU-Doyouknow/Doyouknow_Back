@@ -1,4 +1,8 @@
 package org.ayu.doyouknowback.news.repository;
 
-public interface NewsRepository {
+
+import org.ayu.doyouknowback.news.domain.News;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface NewsRepository extends JpaRepository<News, Long> {
 }

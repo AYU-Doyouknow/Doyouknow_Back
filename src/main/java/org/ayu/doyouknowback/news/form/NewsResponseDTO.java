@@ -1,4 +1,34 @@
 package org.ayu.doyouknowback.news.form;
 
-public class NewsResponseDTO {
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.ayu.doyouknowback.news.domain.News;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
+public class NewsResponseDTO {//서버->클라이언트
+    private Long id;
+    private String newsTitle;// 타이틀
+    private String newsDormitory; //작성자
+    private String newsLink; // *첨부파일? 링크?*
+    private String newsDate; //게시일
+    private int newsViews; // 조회수
+    private int newsBody;
+
+    public static NewsResponseDTO fromEntity(News news){
+        //Entity를 받아와서 DTO로 변경해줌
+        return NewsResponseDTO.builder()
+                .id(news.getId())
+                .newsTitle(news.getNewsTitle())
+                .newsDormitory(news.getNewsDormitory())
+                .newsLink(news.getNewsLink())
+                .newsDate(news.getNewsDate())
+                .newsViews(news.getNewsViews())
+                .build();
+    }
 }
