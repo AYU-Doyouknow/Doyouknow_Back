@@ -18,7 +18,7 @@ public class NewsResponseDTO {//서버->클라이언트
     private String newsLink; // *첨부파일? 링크?*
     private String newsDate; //게시일
     private int newsViews; // 조회수
-    private int newsBody;
+    private String newsBody;
 
     public static NewsResponseDTO fromEntity(News news){
         //Entity를 받아와서 DTO로 변경해줌

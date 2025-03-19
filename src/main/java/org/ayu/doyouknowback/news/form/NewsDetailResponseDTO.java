@@ -17,6 +17,6 @@ public class NewsDetailResponseDTO {
     private String newsLink; // *첨부파일? 링크?*
     private String newsDate; //게시일
     private int newsViews; // 조회수
-    private int newsBody;
+    private String newsBody;
 
 }
