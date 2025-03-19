@@ -3,6 +3,7 @@ package org.ayu.doyouknowback.notice.controller;
 import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.notice.form.NoticeCategoryResponseDTO;
 import org.ayu.doyouknowback.notice.form.NoticeDetailResponseDTO;
+import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.notice.service.NoticeService;
 import org.springframework.http.HttpStatus;
@@ -20,21 +21,21 @@ public class NoticeController {
 
     @GetMapping("/all") // 게시글 전체조회
     public ResponseEntity<List<NoticeResponseDTO>> getAllNotice(){
-        // noticeService.findAll();
 
-        // return ResponseEntity.status(HttpStatus.OK).body();
-        return null;
+        List<NoticeResponseDTO> noticeResponseDTOList = noticeService.findAll();
+
+        return ResponseEntity.status(HttpStatus.OK).body(noticeResponseDTOList);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<List<NoticeDetailResponseDTO>> getDetailNotice(){
-        // noticeService.findById();
+    @GetMapping("/detail/{NoticeId}")
+    public ResponseEntity<NoticeDetailResponseDTO> getDetailNotice(@PathVariable Long NoticeId){
 
-        // return ResponseEntity.status(HttpStatus.OK).body();
-        return null;
+        NoticeDetailResponseDTO noticeDetailResponseDTO = noticeService.findById(NoticeId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(noticeDetailResponseDTO);
     }
 
-    @GetMapping("/detail/{category}")
+    @GetMapping("/category/{category}")
     public ResponseEntity<List<NoticeCategoryResponseDTO>> getCategoryNotice(@PathVariable Long NoticeId){
         // noticeService.findByCategory();
 
@@ -43,7 +44,9 @@ public class NoticeController {
     }
 
     @PostMapping("/addNotice")
-    public ResponseEntity<String> createNotice(){
+    public ResponseEntity<String> createNotice(@RequestBody List<NoticeRequestDTO> noticeRequestDTOList){
+
+        noticeService.save(noticeRequestDTOList);
 
         return ResponseEntity.status(HttpStatus.OK).body("Notice Successfully Created");
     }
