@@ -31,6 +31,7 @@ public class NoticeCategoryResponseDTO {
                 .noticeDate(notice.getNoticeDate())
                 .noticeCategory(notice.getNoticeCategory())
                 .noticeViews(notice.getNoticeViews())
+                .noticeBody(notice.getNoticeBody())
                 .build();
     }
 

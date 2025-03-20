@@ -27,7 +27,7 @@ public class NoticeController {
         return ResponseEntity.status(HttpStatus.OK).body(noticeResponseDTOList);
     }
 
-    @GetMapping("/detail/{NoticeId}")
+    @GetMapping("/detail/{NoticeId}") // 게시글 상세조회 ( Path Variable )
     public ResponseEntity<NoticeDetailResponseDTO> getDetailNotice(@PathVariable Long NoticeId){
 
         NoticeDetailResponseDTO noticeDetailResponseDTO = noticeService.findById(NoticeId);
@@ -35,7 +35,7 @@ public class NoticeController {
         return ResponseEntity.status(HttpStatus.OK).body(noticeDetailResponseDTO);
     }
 
-    @GetMapping("/category")
+    @GetMapping("/category") // 카테고리 별 게시글 조회 ( Query String : Requestparam )
     public ResponseEntity<List<NoticeCategoryResponseDTO>> getCategoryNotice(@RequestParam("noticeCategory") String noticeCategory){
 
         List<NoticeCategoryResponseDTO> noticeCategoryResponseDTOList = noticeService.findAllByCategory(noticeCategory);
@@ -44,7 +44,7 @@ public class NoticeController {
         // return null;
     }
 
-    @PostMapping("/addNotice")
+    @PostMapping("/addNotice") // 게시글 데이터 요청 저장
     public ResponseEntity<String> createNotice(@RequestBody List<NoticeRequestDTO> noticeRequestDTOList){
 
         noticeService.save(noticeRequestDTOList);

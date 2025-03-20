@@ -37,6 +37,7 @@ public class Notice {
                 .noticeDate(noticeRequestDTO.getNoticeDate())
                 .noticeCategory(noticeRequestDTO.getNoticeCategory())
                 .noticeViews(noticeRequestDTO.getNoticeViews())
+                .noticeBody(noticeRequestDTO.getNoticeBody())
                 .build();
     }
 }
