@@ -35,12 +35,13 @@ public class NoticeController {
         return ResponseEntity.status(HttpStatus.OK).body(noticeDetailResponseDTO);
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<NoticeCategoryResponseDTO>> getCategoryNotice(@PathVariable Long NoticeId){
-        // noticeService.findByCategory();
+    @GetMapping("/category")
+    public ResponseEntity<List<NoticeCategoryResponseDTO>> getCategoryNotice(@RequestParam("noticeCategory") String noticeCategory){
 
-        // return ResponseEntity.status(HttpStatus.OK).body();
-        return null;
+        List<NoticeCategoryResponseDTO> noticeCategoryResponseDTOList = noticeService.findAllByCategory(noticeCategory);
+
+        return ResponseEntity.status(HttpStatus.OK).body(noticeCategoryResponseDTOList);
+        // return null;
     }
 
     @PostMapping("/addNotice")

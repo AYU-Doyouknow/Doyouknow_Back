@@ -2,6 +2,7 @@ package org.ayu.doyouknowback.notice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.notice.domain.Notice;
+import org.ayu.doyouknowback.notice.form.NoticeCategoryResponseDTO;
 import org.ayu.doyouknowback.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.notice.form.NoticeResponseDTO;
@@ -57,6 +58,20 @@ public class NoticeService {
         }else {
             return null;
         }
+    }
+
+    public List<NoticeCategoryResponseDTO> findAllByCategory(String category){
+
+        List<Notice> noticeList = noticeRepository.findAllByCategory(category);
+
+        List<NoticeCategoryResponseDTO> noticeCategoryResponseDTOList = new ArrayList<>();
+
+        for (Notice notice : noticeList) {
+            noticeCategoryResponseDTOList.add(NoticeCategoryResponseDTO.toDTO(notice));
+        }
+
+        return noticeCategoryResponseDTOList;
+
     }
 
 }
