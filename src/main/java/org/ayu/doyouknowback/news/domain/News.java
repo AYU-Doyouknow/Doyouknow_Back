@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 
 @Entity
 @Builder
@@ -25,4 +26,15 @@ public class News {
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String newsBody; // news 글 내용
+
+    public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
+        return News.builder()
+                .newsTitle(newsRequestDTO.getNewsTitle())
+                .newsDormitory(newsRequestDTO.getNewsDormitory())
+                .newsLink(newsRequestDTO.getNewsLink())
+                .newsDate(newsRequestDTO.getNewsDate())
+                .newsViews(newsRequestDTO.getNewsViews())
+                .newsBody(newsRequestDTO.getNewsBody())
+                .build();
+    }
 }

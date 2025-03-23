@@ -27,8 +27,8 @@ public class NewsResponseDTO {//서버->클라이언트
                 .newsTitle(news.getNewsTitle())
                 .newsDormitory(news.getNewsDormitory())
                 .newsLink(news.getNewsLink())
-                .newsDate(news.getNewsDate())
-                .newsViews(news.getNewsViews())
+                .newsDate(news.getNewsDate ())//만약 날짜를 문자열로 변경해야한다면 형변환 필요
+                .newsViews(news.getNewsViews ())
                 .build();
     }
 }
