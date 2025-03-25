@@ -7,6 +7,8 @@ import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.notice.service.NoticeService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +42,7 @@ public class NoticeController {
     }
 
     @GetMapping("/detail/{NoticeId}") // 게시글 상세조회 ( Path Variable )
-    public ResponseEntity<NoticeDetailResponseDTO> getDetailNotice(@PathVariable Long NoticeId){
+    public ResponseEntity<NoticeDetailResponseDTO> getDetailNotice(@PathVariable Long NoticeId, @PageableDefault(page=1) Pageable pageable ){
 
         NoticeDetailResponseDTO noticeDetailResponseDTO = noticeService.findById(NoticeId);
 
