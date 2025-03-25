@@ -11,7 +11,7 @@ import org.ayu.doyouknowback.news.domain.News;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class NewsResponseDTO {//서버->클라이언트
+public class NewsDetailResponseDTO {
     private Long id;
     private String newsTitle;// 타이틀
     private String newsDormitory; //작성자
@@ -19,10 +19,9 @@ public class NewsResponseDTO {//서버->클라이언트
     private String newsDate; //게시일
     private int newsViews; // 조회수
     private String newsBody;
-
-    public static NewsResponseDTO fromEntity(News news){
+    public static NewsDetailResponseDTO fromEntity(News news){
         //Entity를 받아와서 DTO로 변경해줌
-        return NewsResponseDTO.builder()
+        return NewsDetailResponseDTO.builder()
                 .id(news.getId())
                 .newsTitle(news.getNewsTitle())
                 .newsDormitory(news.getNewsDormitory())
