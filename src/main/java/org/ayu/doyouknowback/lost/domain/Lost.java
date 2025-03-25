@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.ayu.doyouknowback.lost.form.LostRequestDTO;
 
 @Entity
 @Builder
@@ -25,4 +26,16 @@ public class Lost {
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String lostBody;
+
+    public static Lost toSaveEntity(LostRequestDTO lostRequestDTO){
+        return Lost.builder()
+                //id값은 strategy에서 자동 생성 방식이므로 id는 세팅하지 않음
+                .lostTitle(lostRequestDTO.getLostTitle())
+                .lostDormitory(lostRequestDTO.getLostDormitory())
+                .lostLink(lostRequestDTO.getLostLink())
+                .lostDate(lostRequestDTO.getLostDate())
+                .lostViews(lostRequestDTO.getLostViews())
+                .lostBody(lostRequestDTO.getLostBody())
+                .build();
+    }
 }
