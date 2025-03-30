@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 public class LostRequestDTO {
     private Long id;
     private String lostTitle;
-    private String lostDormitory;
-    private String lostLink;
+    private String lostAuthor;
     private String lostDate;
-    private int lostViews;
     private String lostBody;
 }

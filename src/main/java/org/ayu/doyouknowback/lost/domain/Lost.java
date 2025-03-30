@@ -15,26 +15,22 @@ import org.ayu.doyouknowback.lost.form.LostRequestDTO;
 public class Lost {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String lostTitle;
-    private String lostDormitory;
-    private String lostLink;
+    private String lostAuthor;
     private String lostDate;
-    private int lostViews;
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String lostBody;
 
     public static Lost toSaveEntity(LostRequestDTO lostRequestDTO){
         return Lost.builder()
-                //id값은 strategy에서 자동 생성 방식이므로 id는 세팅하지 않음
+                .id(lostRequestDTO.getId())
                 .lostTitle(lostRequestDTO.getLostTitle())
-                .lostDormitory(lostRequestDTO.getLostDormitory())
-                .lostLink(lostRequestDTO.getLostLink())
+                .lostAuthor(lostRequestDTO.getLostAuthor())
                 .lostDate(lostRequestDTO.getLostDate())
-                .lostViews(lostRequestDTO.getLostViews())
                 .lostBody(lostRequestDTO.getLostBody())
                 .build();
     }
