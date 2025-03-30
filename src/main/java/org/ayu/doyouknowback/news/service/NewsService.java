@@ -7,9 +7,14 @@ import org.ayu.doyouknowback.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.news.repository.NewsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,15 +39,25 @@ public class NewsService {
 
     // 학교소식 전체 조회 (GET)
     @Transactional(readOnly = true)
-    public List<NewsResponseDTO> getAll() {
-        List<News> newsEntityList = newsRepository.findAll();
-        List<NewsResponseDTO> newsResponseDTOList = new ArrayList<>();
+    public Page<NewsResponseDTO> getAll(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
 
-        for (News news : newsEntityList) {
-            newsResponseDTOList.add(NewsResponseDTO.fromEntity(news));
+        // Sort.Direction.fromString(desc) => Sort.Direction.DESC로 변환
+        // Sort.by(Sort.Direction.DESC, "id") => id별로 내림차순 정렬
+        Sort sorting = Sort.by(Sort.Direction.fromString(sortParams[1]), sortParams[0]);
+
+        //페이지 객체 생성
+        Pageable pageable = PageRequest.of(page, size, sorting);
+
+        //페이지 담고
+        Page<News> newsEntity = newsRepository.findAll(pageable);
+
+        // dto -> entity 변환
+        List<NewsResponseDTO> newsDTO = new ArrayList<>();
+        for(News news : newsEntity){
+            newsDTO.add(NewsResponseDTO.fromEntity(news));
         }
-
-        return newsResponseDTOList;
+        return new PageImpl<>(newsDTO, pageable, newsEntity.getTotalElements());
     }
 
     // 학교소식 세부 조회 (GET)
