@@ -13,20 +13,16 @@ import org.ayu.doyouknowback.lost.domain.Lost;
 public class LostDetailResponseDTO {
     private Long id;
     private String lostTitle;
-    private String lostDormitory;
-    private String lostLink;
+    private String lostAuthor;
     private String lostDate;
-    private int lostViews;
     private String lostBody;
 
     public static LostDetailResponseDTO fromEntity(Lost lost){
         return LostDetailResponseDTO.builder()
                 .id(lost.getId())
                 .lostTitle(lost.getLostTitle())
-                .lostDormitory(lost.getLostDormitory())
-                .lostLink(lost.getLostLink())
+                .lostAuthor(lost.getLostAuthor())
                 .lostDate(lost.getLostDate())
-                .lostViews(lost.getLostViews())
                 .lostBody(lost.getLostBody())
                 .build();
     }
