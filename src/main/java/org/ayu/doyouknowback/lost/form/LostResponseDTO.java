@@ -13,7 +13,7 @@ import org.ayu.doyouknowback.lost.domain.Lost;
 public class LostResponseDTO {
     private Long id;
     private String lostTitle;
-    private String lostAuthor;
+    private String lostWriter;
     private String lostDate;
 
 
@@ -21,7 +21,7 @@ public class LostResponseDTO {
         return LostResponseDTO.builder()
                 .id(lost.getId())
                 .lostTitle(lost.getLostTitle())
-                .lostAuthor(lost.getLostAuthor())
+                .lostWriter(lost.getLostWriter())
                 .lostDate(lost.getLostDate())
                 .build();
     }

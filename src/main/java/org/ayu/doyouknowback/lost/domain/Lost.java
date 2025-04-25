@@ -19,7 +19,7 @@ public class Lost {
     private Long id;
 
     private String lostTitle;
-    private String lostAuthor;
+    private String lostWriter;
     private String lostDate;
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
@@ -29,7 +29,7 @@ public class Lost {
         return Lost.builder()
                 .id(lostRequestDTO.getId())
                 .lostTitle(lostRequestDTO.getLostTitle())
-                .lostAuthor(lostRequestDTO.getLostAuthor())
+                .lostWriter(lostRequestDTO.getLostWriter())
                 .lostDate(lostRequestDTO.getLostDate())
                 .lostBody(lostRequestDTO.getLostBody())
                 .build();
