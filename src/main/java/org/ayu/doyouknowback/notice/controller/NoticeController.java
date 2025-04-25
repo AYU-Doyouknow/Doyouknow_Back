@@ -77,7 +77,7 @@ public class NoticeController {
 
         noticeService.save(noticeRequestDTOList);
 
-        return ResponseEntity.status(HttpStatus.OK).body("Notice Successfully Created");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Notice Successfully Created");
     }
 
 
