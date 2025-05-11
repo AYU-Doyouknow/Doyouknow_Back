@@ -1,6 +1,7 @@
 package org.ayu.doyouknowback.notice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.ayu.doyouknowback.notice.domain.Notice;
 import org.ayu.doyouknowback.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.notice.form.*;
@@ -11,11 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class NoticeService {
+public class  NoticeService {
 
     private final NoticeRepository noticeRepository;
 
@@ -26,6 +28,31 @@ public class NoticeService {
 
         for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
             noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+        }
+
+        noticeRepository.saveAll(noticeList);
+    }
+
+    @Transactional
+    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList){
+
+        List<Notice> LatestNoticeList = noticeRepository.findTop5ByOrderByIdDesc();
+
+        List<Notice> noticeList = new ArrayList<>();
+
+        for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
+
+            boolean isexist = false;
+
+            for (Notice latestNotice : LatestNoticeList){
+                if (Objects.equals(latestNotice.getNoticeTitle(), noticeRequestDTO.getNoticeTitle())){
+                    isexist = true;
+                    break;
+                }
+            }
+
+            if(!isexist)
+                noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
         }
 
         noticeRepository.saveAll(noticeList);
@@ -108,5 +135,24 @@ public class NoticeService {
         return new PageImpl<>(responseDTOS, pageable, noticeList.getTotalElements());
 
     }
-
 }
+
+//    받아온 크롤링 5개 데이터 전체 공지글과 대조 후 최신화
+//    @Transactional
+//    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList){
+//
+//        List<Notice> noticeList = new ArrayList<>();
+//
+//        for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
+//
+//            String title = noticeRequestDTO.getNoticeTitle(); // Req 로 받은 공지 title
+//
+//            Optional<Notice> optionalNotice = noticeRepository.findByNoticeTitle(title);
+//
+//            if(optionalNotice.isEmpty())
+//                noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+//        }
+//
+//        noticeRepository.saveAll(noticeList);
+//    }
+

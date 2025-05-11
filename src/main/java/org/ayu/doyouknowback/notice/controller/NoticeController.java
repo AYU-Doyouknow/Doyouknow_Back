@@ -25,7 +25,9 @@ public class NoticeController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "id,desc") String sort){
+
         Page<NoticeResponseDTO> noticeResponseDTOList = noticeService.findAll(page, size, sort);
+
         if (noticeResponseDTOList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else return ResponseEntity.status(HttpStatus.OK).body(noticeResponseDTOList);
@@ -73,7 +75,8 @@ public class NoticeController {
     public ResponseEntity<String> createNotice(@RequestBody List<NoticeRequestDTO> noticeRequestDTOList){
 
         try {
-            noticeService.save(noticeRequestDTOList);
+            // noticeService.save(noticeRequestDTOList);
+            noticeService.saveLatestNotice(noticeRequestDTOList);
             return ResponseEntity.status(HttpStatus.CREATED).body("Notice Successfully Created");
         } catch (IllegalArgumentException e) { // IllegalArgumentException : 호출자가 인수로 부적절한 값을 넘길 때 던지는 예외
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
