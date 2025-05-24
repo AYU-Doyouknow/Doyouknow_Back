@@ -1,4 +1,5 @@
 FROM openjdk:17
 COPY build/libs/*.jar app.jar
-EXPOSE 8080
+COPY keystore.p12 keystore.p12
+EXPOSE 443
 ENTRYPOINT ["java", "-jar", "app.jar"]
