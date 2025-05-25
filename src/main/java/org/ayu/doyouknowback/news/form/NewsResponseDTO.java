@@ -25,6 +25,7 @@ public class NewsResponseDTO {//서버->클라이언트
                 .newsTitle(news.getNewsTitle())
                 .newsWriter(news.getNewsWriter())
                 .newsDate(news.getNewsDate ())//만약 날짜를 문자열로 변경해야한다면 형변환 필요
+                .newsBody(news.getNewsBody())
                 .build();
     }
 }
