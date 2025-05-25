@@ -39,5 +39,17 @@ public class NewsController {
         return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
     }
 
+    // 뉴스 제목 검색 API
+    @GetMapping("/search")
+    public ResponseEntity<Page<NewsResponseDTO>> searchNews(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id,desc") String sort) {
+
+        Page<NewsResponseDTO> result = newsService.searchByTitle(keyword, page, size, sort);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
 
 }

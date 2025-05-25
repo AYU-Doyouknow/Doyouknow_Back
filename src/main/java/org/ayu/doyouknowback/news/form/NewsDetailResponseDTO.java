@@ -17,8 +17,7 @@ public class NewsDetailResponseDTO {
     private String newsWriter; //작성자
     private String newsDate; //게시일
     private String newsBody;
-    private String newsDownloadLink; //다운로드 링크
-    private String newsDownloadTitle; //다운로드 제목
+
     public static NewsDetailResponseDTO fromEntity(News news){
         //Entity를 받아와서 DTO로 변경해줌
         return NewsDetailResponseDTO.builder()
@@ -27,8 +26,6 @@ public class NewsDetailResponseDTO {
                 .newsWriter(news.getNewsWriter())
                 .newsDate(news.getNewsDate ())//만약 날짜를 문자열로 변경해야한다면 형변환 필요
                 .newsBody(news.getNewsBody())
-                .newsDownloadLink(news.getNewsDownloadLink())
-                .newsDownloadTitle(news.getNewsDownloadTitle())
                 .build();
     }
 }

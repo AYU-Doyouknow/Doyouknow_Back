@@ -13,17 +13,13 @@ import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 @AllArgsConstructor
 @Getter
 public class News {
-
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //글 번호
 
     private String newsTitle;// 타이틀
     private String newsWriter; //작성자
     private String newsDate; //게시일
-    private String newsDownloadLink; //다운로드 링크
-    private String newsDownloadTitle; //다운로드 제목
-    @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String newsBody; // news 글 내용
 
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
