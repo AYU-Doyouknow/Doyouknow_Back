@@ -10,8 +10,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class NoticeSchedulerConfiguration {
     
-    // 매일 23시~01시 사이 매 5분마다 실행 (cron 설명: 초 분 시 일 월 요일)
-    @Scheduled(cron = "0 * 23-23,0-1 * * *")
+    // 매일 9시~18시 사이 매 30분마다 실행 (cron 설명: 초 분 시 일 월 요일)
+    //@Scheduled(cron = "0 0/30 9-18 * * *")
     public void runNoticePythonScript() {
         // 로컬 환경 개발용 주소
         String pythonScriptPath = "notice.py";
