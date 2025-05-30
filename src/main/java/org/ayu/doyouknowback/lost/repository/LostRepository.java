@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LostRepository extends JpaRepository<Lost, Long> {
     Page<Lost> findAll(Pageable pageable);
+
+    Page<Lost> findByLostTitleContainingOrLostBodyContaining(String value, String value1, Pageable pageable);
 }

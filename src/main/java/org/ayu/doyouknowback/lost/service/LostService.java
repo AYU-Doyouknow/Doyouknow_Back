@@ -57,6 +57,20 @@ public class LostService {
         return new PageImpl<>(lostDTO, pageable, lostEntity.getTotalElements());
     }
 
+    public Page<LostResponseDTO> getSearch(String value, int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort sorting = Sort.by(Sort.Direction.fromString(sortParams[1]), sortParams[0]);
+        Pageable pageable = PageRequest.of(page, size, sorting);
+        Page<Lost> lostEntity = lostRepository.findByLostTitleContainingOrLostBodyContaining(value, value, pageable);
+
+        List<LostResponseDTO> lostDTO = new ArrayList<>();
+        for(Lost lost : lostEntity){
+            lostDTO.add(LostResponseDTO.fromEntity(lost));
+        }
+
+        return new PageImpl<>(lostDTO, pageable, lostEntity.getTotalElements());
+    }
+
     public LostDetailResponseDTO getfindById(Long lostId) {
         Optional<Lost> lostOptional = lostRepository.findById(lostId);
 
@@ -79,6 +93,4 @@ public class LostService {
 
         lostRepository.saveAll(lostEntity);
     }
-
-
 }
