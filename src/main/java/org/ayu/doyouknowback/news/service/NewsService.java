@@ -72,6 +72,25 @@ public class NewsService {
             return null;
         }
     }
+    @Transactional(readOnly = true) // 뉴스 제목 또는 본문을 통해 검색하기
+    public Page<NewsResponseDTO> searchByTitle(String keyword, int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "desc";
+
+        Sort sorting = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        Pageable pageable = PageRequest.of(page, size, sorting);
+
+        // 제목 또는 본문에 키워드가 포함된 뉴스 검색
+        Page<News> newsEntityPage = newsRepository.findByNewsTitleContainingOrNewsBodyContaining(keyword, keyword, pageable);
+
+        List<NewsResponseDTO> newsDTOList = new ArrayList<>();
+        for (News news : newsEntityPage) {
+            newsDTOList.add(NewsResponseDTO.fromEntity(news));
+        }
+
+        return new PageImpl<>(newsDTOList, pageable, newsEntityPage.getTotalElements());
+    }
 
 
 }
