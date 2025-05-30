@@ -18,16 +18,19 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @NonNull
     Page<Notice> findAll(@NonNull Pageable pageable);
-
-    // Noticetitle 상위 5개 최신 글 조회
-    @NonNull
-    List<Notice> findTop5ByOrderByIdDesc(); // NoticeId 로 바꿔야하나?
-
-    @NonNull
-    Optional<Notice> findByNoticeTitle(String title);
-
+    
     // Spring Data JPA 사용
     @NonNull
     Page<Notice> findByNoticeCategory(String noticeCategory, @NonNull Pageable pageable);
+
+    // findByNoticeTitleContaining : 키워드 기준으로 검색하되, 쿼리로 작성(공지 제목, 작성자, 내용 필드 값 전부 참조)
+    @Query("select "
+            + "distinct n "
+            + "from Notice n "
+            + "where "
+            + "   n.noticeTitle like %:kw% "
+            + "   or n.noticeWriter like %:kw% "
+            + "   or n.noticeBody like %:kw% ")
+    Page<Notice> findAllByKeyWord(@Param("kw") String noticeSearchVal, Pageable pageable);
 
 }

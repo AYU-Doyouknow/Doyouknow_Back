@@ -58,12 +58,25 @@ public class NoticeController {
         } else return ResponseEntity.status(HttpStatus.OK).body(noticeCategoryResponseDTOList);
     }
 
+    @GetMapping("/search") // title 키워드 별 게시글 조회, 페이징 처리 ( Query String : Requestparam )
+    public ResponseEntity<Page<NoticeResponseDTO>> getSearchNotice(
+            @RequestParam("noticeSearchVal") String noticeSearchVal,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id,desc") String sort ){
+
+        Page<NoticeResponseDTO> noticeSearchResponseDTOList = noticeService.findAllBySearch(noticeSearchVal, page, size, sort);
+
+        if (noticeSearchResponseDTOList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
+    }
 
     @PostMapping("/addNotice") // 게시글 데이터 요청 저장
     public ResponseEntity<String> createNotice(@RequestBody List<NoticeRequestDTO> noticeRequestDTOList){
 
         try {
-            noticeService.saveLatestNotice(noticeRequestDTOList);
+            noticeService.save(noticeRequestDTOList);
             return ResponseEntity.status(HttpStatus.CREATED).body("Notice Successfully Created");
         } catch (IllegalArgumentException e) { // IllegalArgumentException : 호출자가 인수로 부적절한 값을 넘길 때 던지는 예외
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
