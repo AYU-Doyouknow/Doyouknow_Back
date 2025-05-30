@@ -11,17 +11,26 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @NonNull
     Page<Notice> findAll(@NonNull Pageable pageable);
+    
+    // Spring Data JPA 사용
+    @NonNull
+    Page<Notice> findByNoticeCategory(String noticeCategory, @NonNull Pageable pageable);
 
-//    @Query("select n from Notice n where n.noticeCategory = :noticeCategory")
-//    List<Notice> findAllByCategory(@Param("noticeCategory") String noticeCategory);
-
-    @Query("select n from Notice n where n.noticeCategory = :noticeCategory")
-    Page<Notice> findAllByCategory(@Param("noticeCategory") String noticeCategory, Pageable pageable);
+    // findByNoticeTitleContaining : 키워드 기준으로 검색하되, 쿼리로 작성(공지 제목, 작성자, 내용 필드 값 전부 참조)
+    @Query("select "
+            + "distinct n "
+            + "from Notice n "
+            + "where "
+            + "   n.noticeTitle like %:kw% "
+            + "   or n.noticeWriter like %:kw% "
+            + "   or n.noticeBody like %:kw% ")
+    Page<Notice> findAllByKeyWord(@Param("kw") String noticeSearchVal, Pageable pageable);
 
 }
