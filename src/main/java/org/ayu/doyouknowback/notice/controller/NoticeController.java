@@ -76,7 +76,7 @@ public class NoticeController {
     public ResponseEntity<String> createNotice(@RequestBody List<NoticeRequestDTO> noticeRequestDTOList){
 
         try {
-            noticeService.save(noticeRequestDTOList);
+            noticeService.saveLatestNotice(noticeRequestDTOList);
             return ResponseEntity.status(HttpStatus.CREATED).body("Notice Successfully Created");
         } catch (IllegalArgumentException e) { // IllegalArgumentException : 호출자가 인수로 부적절한 값을 넘길 때 던지는 예외
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

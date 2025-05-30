@@ -22,13 +22,38 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
+//    @Transactional
+//    public void save(List<NoticeRequestDTO> noticeRequestDTOList){
+//
+//        List<Notice> noticeList = new ArrayList<>();
+//
+//        for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
+//            noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+//        }
+//
+//        noticeRepository.saveAll(noticeList);
+//    }
+
     @Transactional
-    public void save(List<NoticeRequestDTO> noticeRequestDTOList){
+    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList){
+
+        List<Notice> LatestNoticeList = noticeRepository.findTop5ByOrderByIdDesc();
 
         List<Notice> noticeList = new ArrayList<>();
 
         for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
-            noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+
+            boolean isexist = false;
+
+            for (Notice latestNotice : LatestNoticeList){
+                if (Objects.equals(latestNotice.getNoticeTitle(), noticeRequestDTO.getNoticeTitle())){
+                    isexist = true;
+                    break;
+                }
+            }
+
+            if(!isexist)
+                noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
         }
 
         noticeRepository.saveAll(noticeList);
