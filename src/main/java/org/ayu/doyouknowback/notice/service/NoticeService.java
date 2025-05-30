@@ -2,7 +2,7 @@ package org.ayu.doyouknowback.notice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.notice.domain.Notice;
-import org.ayu.doyouknowback.notice.form.NoticeCategoryResponseDTO;
+import org.ayu.doyouknowback.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.notice.form.NoticeResponseDTO;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -21,31 +22,42 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
+//    @Transactional
+//    public void save(List<NoticeRequestDTO> noticeRequestDTOList){
+//
+//        List<Notice> noticeList = new ArrayList<>();
+//
+//        for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
+//            noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+//        }
+//
+//        noticeRepository.saveAll(noticeList);
+//    }
+
     @Transactional
-    public void save(List<NoticeRequestDTO> noticeRequestDTOList){
+    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList){
+
+        List<Notice> LatestNoticeList = noticeRepository.findTop5ByOrderByIdDesc();
 
         List<Notice> noticeList = new ArrayList<>();
 
         for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
-            noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+
+            boolean isexist = false;
+
+            for (Notice latestNotice : LatestNoticeList){
+                if (Objects.equals(latestNotice.getNoticeTitle(), noticeRequestDTO.getNoticeTitle())){
+                    isexist = true;
+                    break;
+                }
+            }
+
+            if(!isexist)
+                noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
         }
 
         noticeRepository.saveAll(noticeList);
     }
-
-//    @Transactional(readOnly = true)
-//    public List<NoticeResponseDTO> findAll(){
-//
-//        List<Notice> noticeEntityList = noticeRepository.findAll();
-//
-//        List<NoticeResponseDTO> noticeResponseDTOList = new ArrayList<>();
-//
-//        for (Notice notice : noticeEntityList) {
-//            noticeResponseDTOList.add(NoticeResponseDTO.toDTO(notice));
-//        }
-//
-//        return noticeResponseDTOList;
-//    }
 
     @Transactional
     public Page<NoticeResponseDTO> findAll(int page, int size, String sort){ // 게시글 전체조회 로직 ( paging 기능 추가 )
@@ -71,33 +83,17 @@ public class NoticeService {
 
     public NoticeDetailResponseDTO findById(Long id){
 
-        Optional<Notice> optionalNotice = noticeRepository.findById(id);
+        // SpringBoot 권장 API 에러 핸들러 방식
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Not found NoticeDetail with id = " + id));
 
-        if (optionalNotice.isPresent()){
-            Notice notice = optionalNotice.get();
-            NoticeDetailResponseDTO noticeDetailResponseDTO = NoticeDetailResponseDTO.toDTO(notice);
+        NoticeDetailResponseDTO noticeDetailResponseDTO = NoticeDetailResponseDTO.toDTO(notice);
 
-            return noticeDetailResponseDTO;
-        }else {
-            return null;
-        }
+        return noticeDetailResponseDTO;
+
     }
 
-//    public List<NoticeCategoryResponseDTO> findAllByCategory(String category){
-//
-//        List<Notice> noticeList = noticeRepository.findAllByCategory(category);
-//
-//        List<NoticeCategoryResponseDTO> noticeCategoryResponseDTOList = new ArrayList<>();
-//
-//        for (Notice notice : noticeList) {
-//            noticeCategoryResponseDTOList.add(NoticeCategoryResponseDTO.toDTO(notice));
-//        }
-//
-//        return noticeCategoryResponseDTOList;
-//
-//    }
-
-    public Page<NoticeCategoryResponseDTO> findAllByCategory(String category, int page, int size, String sort){
+    public Page<NoticeResponseDTO> findAllByCategory(String category, int page, int size, String sort){
 
         String[] sortParams = sort.split(","); // 매개변수 sort 배열으로 나누기
         // sortParams[1]=id, sortParams[2]=desc(내림차순: 11, 10, 9, 8, 7 .... [게시글 id 를 기준으로 한다.] )
@@ -107,15 +103,15 @@ public class NoticeService {
 
         Pageable pageable = PageRequest.of(page, size, sorting);
 
-        Page<Notice> noticeList = noticeRepository.findAllByCategory(category, pageable);
+        Page<Notice> noticeList = noticeRepository.findByNoticeCategory(category, pageable);
 
-        List<NoticeCategoryResponseDTO> noticeCategoryResponseDTOList = new ArrayList<>();
+        List<NoticeResponseDTO> responseDTOS = new ArrayList<>();
 
         for (Notice notice : noticeList) {
-            noticeCategoryResponseDTOList.add(NoticeCategoryResponseDTO.toDTO(notice));
+            responseDTOS.add(NoticeResponseDTO.toDTO(notice));
         }
 
-        return new PageImpl<>(noticeCategoryResponseDTOList, pageable, noticeList.getTotalElements());
+        return new PageImpl<>(responseDTOS, pageable, noticeList.getTotalElements());
 
     }
 

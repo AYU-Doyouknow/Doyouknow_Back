@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
@@ -18,10 +19,15 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @NonNull
     Page<Notice> findAll(@NonNull Pageable pageable);
 
-//    @Query("select n from Notice n where n.noticeCategory = :noticeCategory")
-//    List<Notice> findAllByCategory(@Param("noticeCategory") String noticeCategory);
+    // Noticetitle 상위 5개 최신 글 조회
+    @NonNull
+    List<Notice> findTop5ByOrderByIdDesc(); // NoticeId 로 바꿔야하나?
 
-    @Query("select n from Notice n where n.noticeCategory = :noticeCategory")
-    Page<Notice> findAllByCategory(@Param("noticeCategory") String noticeCategory, Pageable pageable);
+    @NonNull
+    Optional<Notice> findByNoticeTitle(String title);
+
+    // Spring Data JPA 사용
+    @NonNull
+    Page<Notice> findByNoticeCategory(String noticeCategory, @NonNull Pageable pageable);
 
 }
