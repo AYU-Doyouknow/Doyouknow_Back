@@ -82,7 +82,7 @@ public class NewsService {
         Pageable pageable = PageRequest.of(page, size, sorting);
 
         // 제목 또는 본문에 키워드가 포함된 뉴스 검색
-        Page<News> newsEntityPage = newsRepository.findByNewsTitleContainingOrNewsBodyContaining(keyword, keyword, pageable);
+        Page<News> newsEntityPage = newsRepository.findByNewsTitleContaining(keyword, pageable);
 
         List<NewsResponseDTO> newsDTOList = new ArrayList<>();
         for (News news : newsEntityPage) {
@@ -92,5 +92,12 @@ public class NewsService {
         return new PageImpl<>(newsDTOList, pageable, newsEntityPage.getTotalElements());
     }
 
+    @Transactional
+    public void SaveLateNews(List<NewsRequestDTO> NewsRequestDTOList) {
+        List<News> newsList = new ArrayList<>();
+        for (NewsRequestDTO newsRequestDTO : NewsRequestDTOList) {
+            String newTitle = newsRequestDTO.getNewsTitle();
+        }
+    }
 
 }
