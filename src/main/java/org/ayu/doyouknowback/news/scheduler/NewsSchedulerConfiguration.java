@@ -31,7 +31,7 @@ public class NewsSchedulerConfiguration {
         try {
             Process process = processBuilder.start();
 
-            // 🔽 Python 출력 읽기
+            //  Python 출력 읽기
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             List<String> crawledTitles = new ArrayList<>();
             String line;
@@ -48,13 +48,13 @@ public class NewsSchedulerConfiguration {
 
             System.out.println("✔ News.py 실행 성공");
 
-            // 🔽 DB에서 최신 뉴스 제목 5개 조회
+            //  DB에서 최신 뉴스 제목 5개 조회
             List<String> dbTitles = newsRepository.findTop5ByOrderByIdDesc()
                     .stream()
                     .map(News::getNewsTitle)
                     .toList();
 
-            // 🔽 중복 검사
+            //  중복 검사
             boolean hasNew = crawledTitles.stream()
                     .anyMatch(title -> !dbTitles.contains(title));
 
@@ -65,7 +65,7 @@ public class NewsSchedulerConfiguration {
 
             System.out.println("새로운 뉴스 감지 → 저장 실행");
 
-            // ✅ 저장용 DTO 리스트 생성
+            //  저장용 DTO 리스트 생성
             List<NewsRequestDTO> requestList = crawledTitles.stream()
                     .map(title -> NewsRequestDTO.builder()
                             .id(null)
@@ -75,7 +75,7 @@ public class NewsSchedulerConfiguration {
                             .build())
                     .toList();
 
-            // ✅ 실제 저장
+            //  실제 저장
             newsService.save(requestList);
 
         } catch (IOException | InterruptedException e) {
