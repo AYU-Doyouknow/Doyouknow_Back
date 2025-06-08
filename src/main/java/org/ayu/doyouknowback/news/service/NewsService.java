@@ -96,8 +96,18 @@ public class NewsService {
     public void SaveLateNews(List<NewsRequestDTO> NewsRequestDTOList) {
         List<News> newsList = new ArrayList<>();
         for (NewsRequestDTO newsRequestDTO : NewsRequestDTOList) {
-            String newTitle = newsRequestDTO.getNewsTitle();
+            String newsTitle = newsRequestDTO.getNewsTitle();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<NewsResponseDTO> getTop5LatestNews() {
+        List<News> newsList = newsRepository.findTop5ByOrderByIdDesc();
+        List<NewsResponseDTO> result = new ArrayList<>();
+        for (News news : newsList) {
+            result.add(NewsResponseDTO.fromEntity(news));
+        }
+        return result;
     }
 
 }

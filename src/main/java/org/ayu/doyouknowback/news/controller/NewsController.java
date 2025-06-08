@@ -50,6 +50,12 @@ public class NewsController {
         Page<NewsResponseDTO> result = newsService.searchByTitle(keyword, page, size, sort);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+    //  5. 최신 뉴스 상위 5개 조회
+    @GetMapping("/top5")
+    public ResponseEntity<List<NewsResponseDTO>> getTop5News() {
+        List<NewsResponseDTO> top5 = newsService.getTop5LatestNews();
+        return ResponseEntity.status(HttpStatus.OK).body(top5);
+    }
 
 
 }
