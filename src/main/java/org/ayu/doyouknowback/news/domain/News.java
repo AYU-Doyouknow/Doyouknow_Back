@@ -20,6 +20,7 @@ public class News {
     private String newsTitle;// 타이틀
     private String newsWriter; //작성자
     private String newsDate; //게시일
+    private String newsBody;
 
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
         return News.builder()
@@ -27,6 +28,7 @@ public class News {
                 .newsTitle(newsRequestDTO.getNewsTitle())
                 .newsWriter(newsRequestDTO.getNewsWriter())
                 .newsDate(newsRequestDTO.getNewsDate())
+                .newsBody(newsRequestDTO.getNewsBody())
                 .build();
     }
 }

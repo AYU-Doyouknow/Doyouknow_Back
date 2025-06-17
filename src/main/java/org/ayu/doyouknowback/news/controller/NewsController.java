@@ -33,11 +33,18 @@ public class NewsController {
         NewsDetailResponseDTO newsDetailResponseDTO = newsService.findById(NewsId);
         return ResponseEntity.status(HttpStatus.OK).body(newsDetailResponseDTO);
     }
-    @PostMapping("/addNews")//새로운 뉴스 추가
+   /* @PostMapping("/addNews")//새로운 뉴스 추가
     public ResponseEntity<String> createNews(@RequestBody List<NewsRequestDTO> newsRequestDTOList){
         newsService.save(newsRequestDTOList);
         return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
+    }*/
+
+    @PostMapping("/addNews")//새로운 뉴스 추가
+    public ResponseEntity<String> createNews(@RequestBody List<NewsRequestDTO> newsRequestDTOList){
+        newsService.saveLatestNews(newsRequestDTOList);
+        return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
     }
+
 
     // 뉴스 제목 검색 API
     @GetMapping("/search")
