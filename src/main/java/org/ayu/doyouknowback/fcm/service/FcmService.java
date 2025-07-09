@@ -1,8 +1,6 @@
 package org.ayu.doyouknowback.fcm.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.fcm.domain.Fcm;
 import org.ayu.doyouknowback.fcm.form.FcmTokenRequestDTO;
@@ -40,7 +38,14 @@ public class FcmService {
         try {
             String response = FirebaseMessaging.getInstance().send(message);
             System.out.println("Successfully sent message: " + response);
-        } catch (Exception e) {
+        } catch (FirebaseMessagingException e){
+            // 없는 토큰 삭제
+            if(e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED){
+                fcmRepository.deleteByToken(token);
+            } else{
+                e.printStackTrace();
+            }
+        } catch (Exception e){
             e.printStackTrace();
         }
     }
