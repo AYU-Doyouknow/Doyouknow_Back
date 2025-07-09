@@ -33,11 +33,18 @@ public class NewsController {
         NewsDetailResponseDTO newsDetailResponseDTO = newsService.findById(NewsId);
         return ResponseEntity.status(HttpStatus.OK).body(newsDetailResponseDTO);
     }
-    @PostMapping("/addNews")//새로운 뉴스 추가
+   /* @PostMapping("/addNews")//새로운 뉴스 추가
     public ResponseEntity<String> createNews(@RequestBody List<NewsRequestDTO> newsRequestDTOList){
         newsService.save(newsRequestDTOList);
         return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
+    }*/
+
+    @PostMapping("/addNews")//새로운 뉴스 추가
+    public ResponseEntity<String> createNews(@RequestBody List<NewsRequestDTO> newsRequestDTOList){
+        newsService.saveLatestNews(newsRequestDTOList);
+        return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
     }
+
 
     // 뉴스 제목 검색 API
     @GetMapping("/search")
@@ -49,6 +56,12 @@ public class NewsController {
 
         Page<NewsResponseDTO> result = newsService.searchByTitle(keyword, page, size, sort);
         return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+    //  5. 최신 뉴스 상위 5개 조회
+    @GetMapping("/top5")
+    public ResponseEntity<List<NewsResponseDTO>> getTop5News() {
+        List<NewsResponseDTO> top5 = newsService.getTop5LatestNews();
+        return ResponseEntity.status(HttpStatus.OK).body(top5);
     }
 
 

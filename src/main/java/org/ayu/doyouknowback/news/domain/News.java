@@ -22,7 +22,6 @@ public class News {
     private String newsDate; //게시일
     @Column(columnDefinition = "LONGTEXT")
     private String newsBody; // news 글 내용
-
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
         return News.builder()
                 .id(newsRequestDTO.getId())
