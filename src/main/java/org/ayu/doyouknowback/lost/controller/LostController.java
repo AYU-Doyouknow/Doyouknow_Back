@@ -36,6 +36,17 @@ public class LostController {
         return ResponseEntity.status(HttpStatus.OK).body(lostDetailResponseDTO);
     }
 
+    //검색 조회
+    @GetMapping("/search")
+    public ResponseEntity<Page<LostResponseDTO>> getSearchLost(
+            @RequestParam String value,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "id,desc") String sort) {
+        Page<LostResponseDTO> lostResponseDTOList = lostService.getSearch(value, page, size, sort);
+        return ResponseEntity.status(HttpStatus.OK).body(lostResponseDTOList);
+    }
+
     //데이터 저장
     @PostMapping("/addLost")
     public ResponseEntity<String> createLost(@RequestBody List<LostRequestDTO> lostRequestDTOList){

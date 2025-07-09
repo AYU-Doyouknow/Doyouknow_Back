@@ -11,4 +11,5 @@ import java.util.List;
 public interface LostRepository extends JpaRepository<Lost, Long> {
     Page<Lost> findAll(Pageable pageable);
     List<Lost> findTop5ByOrderByIdDesc();
+    Page<Lost> findByLostTitleContainingOrLostBodyContaining(String value, String value1, Pageable pageable);
 }

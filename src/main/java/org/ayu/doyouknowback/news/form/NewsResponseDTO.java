@@ -16,7 +16,6 @@ public class NewsResponseDTO {//서버->클라이언트
     private String newsTitle;// 타이틀
     private String newsWriter; //작성자
     private String newsDate; //게시일
-    private String newsBody;
 
     public static NewsResponseDTO fromEntity(News news){
         //Entity를 받아와서 DTO로 변경해줌
