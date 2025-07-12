@@ -10,11 +10,14 @@
 //@RequiredArgsConstructor
 //public class NoticeSchedulerConfiguration {
 //
+//
+//
 //    // 매일 9시~18시 사이 매 30분마다 실행 (cron 설명: 초 분 시 일 월 요일)
-//    @Scheduled(cron = "0 0/30 9-18 * * *")
+//    //@Scheduled(cron = "0 0/30 9-18 * * *")
+//    @Scheduled(cron = "0 * * * * *")
 //    public void runNoticePythonScript() {
 //        // 로컬 환경 개발용 주소
-//        String pythonScriptPath = "notice.py";
+//         String pythonScriptPath = "/Users/iminjun/Desktop/project/Doyouknow/Doyouknow_Crawling/notice.py";
 //
 //        // 서버 환경용 주소
 //        // String pythonScriptPath = "/home/ubuntu/크롤링폴더";
