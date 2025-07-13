@@ -14,10 +14,10 @@ public class NoticeSchedulerConfiguration {
     @Scheduled(cron = "0 0/30 9-18 * * MON-FRI", zone = "Asia/Seoul")
     public void runNoticePythonScript() {
         // 로컬 환경 개발용 주소
-        String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\notice.py";
+        //String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\notice.py";
 
         // 서버 환경용 주소
-        // String pythonScriptPath = "/home/ubuntu/크롤링폴더";
+        String pythonScriptPath = "/home/ubuntu/crawling/notice.py";
 
         ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath);
 

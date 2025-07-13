@@ -14,10 +14,10 @@ public class NewsSchedulerConfiguration {
     @Scheduled(cron = "0 0 9,13,17 * * MON-FRI", zone = "Asia/Seoul")
     public void runNewsPythonScript() {
         // 로컬 환경 개발용 주소
-        String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\News.py";
+        //String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\News.py";
 
         // 서버 환경용 주소
-        // String pythonScriptPath = "/home/ubuntu/크롤링폴더";
+        String pythonScriptPath = "/home/ubuntu/crawling/news.py";
 
         ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath);
 
