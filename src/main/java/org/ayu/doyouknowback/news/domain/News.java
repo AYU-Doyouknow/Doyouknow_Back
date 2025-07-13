@@ -14,7 +14,6 @@ import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 @Getter
 public class News {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //글 번호
 
     private String newsTitle;// 타이틀
