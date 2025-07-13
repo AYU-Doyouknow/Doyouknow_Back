@@ -1,4 +1,4 @@
-/*package org.ayu.doyouknowback.news.scheduler;
+package org.ayu.doyouknowback.news.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,10 +11,10 @@ import java.io.IOException;
 public class NewsSchedulerConfiguration {
 
     // 매일 9시~18시 사이 매 4시간마다 실행 (cron 설명: 초 분 시 일 월 요일)
-    //@Scheduled(cron = "0 0 9,13,17 * * *")
+    @Scheduled(cron = "0 0 9,13,17 * * MON-FRI", zone = "Asia/Seoul")
     public void runNewsPythonScript() {
         // 로컬 환경 개발용 주소
-        String pythonScriptPath = "News.py";
+        String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\News.py";
 
         // 서버 환경용 주소
         // String pythonScriptPath = "/home/ubuntu/크롤링폴더";
@@ -34,4 +34,4 @@ public class NewsSchedulerConfiguration {
             e.printStackTrace();
         }
     }
-}*/
+}
