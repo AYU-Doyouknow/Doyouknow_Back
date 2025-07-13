@@ -45,6 +45,11 @@ public class NewsController {
         return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
     }
 
+    @PostMapping("/addNews/test")//로컬환경 용 새로운 뉴스 추가
+    public ResponseEntity<String> createTestNews(@RequestBody List<NewsRequestDTO> newsRequestDTOList){
+        newsService.save(newsRequestDTOList);
+        return ResponseEntity.status(HttpStatus.CREATED).body("News successfully created");
+    }
 
     // 뉴스 제목 검색 API
     @GetMapping("/search")

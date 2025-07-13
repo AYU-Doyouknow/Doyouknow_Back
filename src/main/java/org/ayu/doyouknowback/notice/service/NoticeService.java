@@ -1,6 +1,7 @@
 package org.ayu.doyouknowback.notice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.ayu.doyouknowback.fcm.service.FcmService;
 import org.ayu.doyouknowback.notice.domain.Notice;
 import org.ayu.doyouknowback.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.notice.form.NoticeDetailResponseDTO;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final FcmService fcmService;
 
 //    @Transactional
 //    public void save(List<NoticeRequestDTO> noticeRequestDTOList){
@@ -35,28 +37,54 @@ public class NoticeService {
 //    }
 
     @Transactional
-    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList){
+    public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList) {
+        // 최근 5개의 공지사항 가져오기
+        List<Notice> latestNotices = noticeRepository.findTop5ByOrderByIdDesc();
 
-        List<Notice> LatestNoticeList = noticeRepository.findTop5ByOrderByIdDesc();
-
-        List<Notice> noticeList = new ArrayList<>();
-
-        for (NoticeRequestDTO noticeRequestDTO : noticeRequestDTOList) {
-
-            boolean isexist = false;
-
-            for (Notice latestNotice : LatestNoticeList){
-                if (Objects.equals(latestNotice.getNoticeTitle(), noticeRequestDTO.getNoticeTitle())){
-                    isexist = true;
-                    break;
-                }
-            }
-
-            if(!isexist)
-                noticeList.add(Notice.toSaveEntity(noticeRequestDTO));
+        // DB에 있는 ID만 모으기
+        List<Long> dbIds = new ArrayList<>();
+        for (Notice notice : latestNotices) {
+            dbIds.add(notice.getId());
         }
 
-        noticeRepository.saveAll(noticeList);
+        // 새로운 공지사항 선별
+        List<NoticeRequestDTO> newNotices = new ArrayList<>();
+        for (NoticeRequestDTO dto : noticeRequestDTOList) {
+            if (!dbIds.contains(dto.getId())) {
+                newNotices.add(dto);
+            }
+        }
+
+        int count = newNotices.size();
+        System.out.println("새로 등록될 공지사항 수: " + count);
+
+        if (count == 0) {
+            return;
+        }
+
+        // 저장할 엔티티 변환
+        List<Notice> noticeListToSave = new ArrayList<>();
+        for (NoticeRequestDTO dto : newNotices) {
+            noticeListToSave.add(Notice.toSaveEntity(dto));
+        }
+
+        // 알림 발송
+        if (count == 1) {
+            String title = newNotices.get(0).getNoticeTitle();
+            fcmService.sendNotificationToAllUser("[공지사항]", title + " 공지사항이 등록되었습니다.");
+        } else {
+            NoticeRequestDTO latest = newNotices.get(0);
+            for (NoticeRequestDTO dto : newNotices) {
+                if (dto.getId() > latest.getId()) {
+                    latest = dto;
+                }
+            }
+            String title = latest.getNoticeTitle();
+            fcmService.sendNotificationToAllUser("[공지사항]", title + " 외 " + (count - 1) + "개 공지사항이 등록되었습니다.");
+        }
+
+        // DB에 저장
+        noticeRepository.saveAll(noticeListToSave);
     }
 
     @Transactional
