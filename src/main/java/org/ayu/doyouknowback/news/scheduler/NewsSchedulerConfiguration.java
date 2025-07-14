@@ -19,7 +19,7 @@ public class NewsSchedulerConfiguration {
         // 서버 환경용 주소
         String pythonScriptPath = "/home/ubuntu/crawling/news.py";
 
-        ProcessBuilder processBuilder = new ProcessBuilder("python", pythonScriptPath);
+        ProcessBuilder processBuilder = new ProcessBuilder("python3", pythonScriptPath);
 
         try {
             Process process = processBuilder.start();
