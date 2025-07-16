@@ -41,6 +41,16 @@ public class NoticeService {
         // 최근 5개의 공지사항 가져오기
         List<Notice> latestNotices = noticeRepository.findTop5ByOrderByIdDesc();
 
+        System.out.println("========DB에서 불러온 최근 5개의 공지사항========");
+        for (Notice notice : latestNotices) {
+            System.out.println("id: " + notice.getId() + ", title: " + notice.getNoticeTitle());
+        }
+
+        System.out.println("=======크롤링으로 불러온 최근 5개의 공지사항=======");
+        for(NoticeRequestDTO notice : noticeRequestDTOList){
+            System.out.println("id: " + notice.getId() + ", title: " + notice.getNoticeTitle());
+        }
+
         // DB에 있는 ID만 모으기
         List<Long> dbIds = new ArrayList<>();
         for (Notice notice : latestNotices) {

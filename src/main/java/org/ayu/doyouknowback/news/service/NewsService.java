@@ -8,6 +8,8 @@ import org.ayu.doyouknowback.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.news.repository.NewsRepository;
+import org.ayu.doyouknowback.notice.domain.Notice;
+import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +46,16 @@ public class NewsService {
     public void saveLatestNews(List<NewsRequestDTO> newsRequestDTOList) {
         // 최근 5개 뉴스 가져오기
         List<News> latestNews = newsRepository.findTop5ByOrderByIdDesc();
+
+        System.out.println("========DB에서 불러온 최근 5개의 학교소식========");
+        for (News news : latestNews) {
+            System.out.println("id: " + news.getId() + ", title: " + news.getNewsTitle());
+        }
+
+        System.out.println("=======크롤링으로 불러온 최근 5개의 학교소식=======");
+        for(NewsRequestDTO news : newsRequestDTOList){
+            System.out.println("id: " + news.getId() + ", title: " + news.getNewsTitle());
+        }
 
         // DB에 있는 ID만 모아두기
         List<Long> dbIds = new ArrayList<>();
