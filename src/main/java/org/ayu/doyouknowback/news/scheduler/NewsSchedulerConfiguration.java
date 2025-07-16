@@ -17,7 +17,7 @@ public class NewsSchedulerConfiguration {
         //String pythonScriptPath = "C:\\Doyouknow\\Doyouknow_Crawling\\News.py";
 
         // 서버 환경용 주소
-        String pythonScriptPath = "/home/ubuntu/crawling/news.py";
+        String pythonScriptPath = "/news.py";
 
         ProcessBuilder processBuilder = new ProcessBuilder("/usr/bin/python3", pythonScriptPath);
 
