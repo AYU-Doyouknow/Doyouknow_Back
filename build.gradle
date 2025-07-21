@@ -25,6 +25,8 @@ dependencies {
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // Swagger
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
