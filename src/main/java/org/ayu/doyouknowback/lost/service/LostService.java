@@ -1,6 +1,7 @@
 package org.ayu.doyouknowback.lost.service;
 
 import lombok.RequiredArgsConstructor;
+import org.ayu.doyouknowback.fcm.service.FcmService;
 import org.ayu.doyouknowback.lost.domain.Lost;
 import org.ayu.doyouknowback.lost.form.LostDetailResponseDTO;
 import org.ayu.doyouknowback.lost.form.LostRequestDTO;
@@ -10,15 +11,14 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class LostService {
 
     private final LostRepository lostRepository;
+    private final FcmService fcmService;
 
 //    @Transactional(readOnly = true)
 //    //jpa는 자동적으로 변경감지를 수행해서 엔티티의 변경 여부를 감시한다.
@@ -85,6 +85,54 @@ public class LostService {
 
     @Transactional
     public void createLost(List<LostRequestDTO> lostRequestDTOList) {
+        // 최근 5개 분실물 가져오기
+        List<Lost> last = lostRepository.findTop5ByOrderByIdDesc();
+
+        // DB에 있는 ID만 모아두기
+        List<Long> dbIds = new ArrayList<>();
+        for (Lost lost : last) {
+            dbIds.add(lost.getId());
+        }
+
+        // 새로운 분실물 리스트 선별
+        List<LostRequestDTO> newLost = new ArrayList<>();
+        for (LostRequestDTO dto : lostRequestDTOList) {
+            if (!dbIds.contains(dto.getId())) {
+                newLost.add(dto);
+            }
+        }
+
+        int count = newLost.size();
+        System.out.println("새로 등록될 항목 수: " + count);
+        System.out.println(count);
+
+        if(count == 1){
+            String title = newLost.get(0).getLostTitle();
+            fcmService.sendNotificationToAllUser("[분실습득]", title + " 게시글이 등록되었습니다.");
+            saveLost(lostRequestDTOList);
+        }else if(count > 1){
+            // 가장 ID가 큰 항목 찾기
+            LostRequestDTO latest = newLost.get(0);
+            for (LostRequestDTO dto : newLost) {
+                if (dto.getId() > latest.getId()) {
+                    latest = dto;
+                }
+            }
+
+            String title = latest.getLostTitle();
+            fcmService.sendNotificationToAllUser("[분실습득]", title + " 외 " + (count -1) + "개 게시글이 등록되었습니다.");
+            saveLost(lostRequestDTOList);
+        }else{
+            return;
+        }
+    }
+
+    private boolean isSame(Lost db, LostRequestDTO dto) {
+        System.out.println("비교 : " + db.getId() + " " + dto.getId());
+        return Objects.equals(db.getLostTitle(), dto.getLostTitle());
+    }
+
+    private void saveLost(List<LostRequestDTO> lostRequestDTOList){
         List<Lost> lostEntity = new ArrayList<>();
 
         for(LostRequestDTO lostRequestDTO : lostRequestDTOList){
