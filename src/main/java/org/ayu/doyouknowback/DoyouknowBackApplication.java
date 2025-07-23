@@ -10,5 +10,4 @@ public class DoyouknowBackApplication {
     public static void main(String[] args) {
         SpringApplication.run(DoyouknowBackApplication.class, args);
     }
-
 }
