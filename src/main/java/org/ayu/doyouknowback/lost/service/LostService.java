@@ -108,7 +108,7 @@ public class LostService {
 
         if(count == 1){
             String title = newLost.get(0).getLostTitle();
-            fcmService.sendNotificationToAllUser("[분실습득]", title + " 게시글이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("[분실습득]", title + " 게시글이 등록되었습니다.");
             saveLost(lostRequestDTOList);
         }else if(count > 1){
             // 가장 ID가 큰 항목 찾기
@@ -120,7 +120,7 @@ public class LostService {
             }
 
             String title = latest.getLostTitle();
-            fcmService.sendNotificationToAllUser("[분실습득]", title + " 외 " + (count -1) + "개 게시글이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("[분실습득]", title + " 외 " + (count -1) + "개 게시글이 등록되었습니다.");
             saveLost(lostRequestDTOList);
         }else{
             return;

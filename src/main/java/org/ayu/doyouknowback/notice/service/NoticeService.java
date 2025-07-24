@@ -81,7 +81,7 @@ public class NoticeService {
         // 알림 발송
         if (count == 1) {
             String title = newNotices.get(0).getNoticeTitle();
-            fcmService.sendNotificationToAllUser("[공지사항]", title + " 공지사항이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("[공지사항]", title + " 공지사항이 등록되었습니다.");
         } else {
             NoticeRequestDTO latest = newNotices.get(0);
             for (NoticeRequestDTO dto : newNotices) {
@@ -90,7 +90,7 @@ public class NoticeService {
                 }
             }
             String title = latest.getNoticeTitle();
-            fcmService.sendNotificationToAllUser("[공지사항]", title + " 외 " + (count - 1) + "개 공지사항이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("[공지사항]", title + " 외 " + (count - 1) + "개 공지사항이 등록되었습니다.");
         }
 
         // DB에 저장
