@@ -16,6 +16,8 @@ public class NoticeRequestDTO {
     private String noticeDownloadLink; //다운로드 링크
     private String noticeDownloadTitle; //다운로드 제목
 
+
+
 //    @Builder
 //    public NoticeRequestDTO(String noticeTitle, String noticeDormitory, String noticeLink,
 //                            String noticeDate, String noticeCategory, int noticeViews, String noticeBody){

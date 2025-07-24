@@ -21,6 +21,21 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
+//    @GetMapping("/all") // 게시글 전체조회 ( paging 기능 구현 )
+//    public ResponseEntity<Page<NoticeResponseDTO>> getAllNotice(
+//            @RequestParam(required = false, defaultValue = "0") int page,
+//            @RequestParam(required = false, defaultValue = "10") int size,
+//            @RequestParam(required = false, defaultValue = "id,desc") String sort){
+//
+//        Page<NoticeResponseDTO> noticeResponseDTOList = noticeService.findAll(page, size, sort);
+//
+//        if (noticeResponseDTOList.isEmpty()) {
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } else return ResponseEntity.status(HttpStatus.OK).body(noticeResponseDTOList);
+//    }
+
+
+
     @GetMapping("/all") // 게시글 전체조회 ( paging 기능 구현 )
     public ResponseEntity<Page<NoticeResponseDTO>> getAllNotice(
             @RequestParam(required = false, defaultValue = "0") int page,

@@ -2,6 +2,7 @@ package org.ayu.doyouknowback.notice.repository;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
+import org.ayu.doyouknowback.lost.domain.Lost;
 import org.ayu.doyouknowback.notice.domain.Notice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @NonNull
     Page<Notice> findByNoticeCategory(String noticeCategory, @NonNull Pageable pageable);
 
+    @NonNull
+    Page<Notice> findByNoticeTitleContainingOrNoticeBodyContaining(String value, String value1, Pageable pageable);
+
     // findByNoticeTitleContaining : 키워드 기준으로 검색하되, 쿼리로 작성(공지 제목, 작성자, 내용 필드 값 전부 참조)
     @Query("select "
             + "distinct n "
@@ -36,5 +40,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
             + "   or n.noticeWriter like %:kw% "
             + "   or n.noticeBody like %:kw% ")
     Page<Notice> findAllByKeyWord(@Param("kw") String noticeSearchVal, Pageable pageable);
+
+
 
 }

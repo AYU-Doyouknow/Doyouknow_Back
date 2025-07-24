@@ -163,7 +163,9 @@ public class NoticeService {
 
         Pageable pageable = PageRequest.of(page, size, sorting);
 
-        Page<Notice> noticeList = noticeRepository.findAllByKeyWord(noticeSearchVal, pageable);
+        // Page<Notice> noticeList = noticeRepository.findAllByKeyWord(noticeSearchVal, pageable);
+
+        Page<Notice> noticeList = noticeRepository.findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
 
         List<NoticeResponseDTO> responseDTOS = new ArrayList<>();
 
