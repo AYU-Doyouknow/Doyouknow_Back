@@ -67,9 +67,10 @@ public class NoticeController {
 
         Page<NoticeResponseDTO> noticeSearchResponseDTOList = noticeService.findAllBySearch(noticeSearchVal, page, size, sort);
 
-        if (noticeSearchResponseDTOList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
+//        if (noticeSearchResponseDTOList.isEmpty()) {
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } else return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
+        return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
     }
 
     @PostMapping("/addNotice") // 게시글 데이터 요청 저장
