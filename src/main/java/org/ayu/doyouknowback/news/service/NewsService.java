@@ -87,7 +87,7 @@ public class NewsService {
         // 알림 메시지 전송 (1개 또는 여러 개)
         if (count == 1) {
             String title = newNewsList.get(0).getNewsTitle();
-            fcmService.sendNotificationToAllExpo("[학교소식]", title + " 학교소식이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title);
         } else {
             // 가장 ID가 큰 뉴스 제목 선택
             NewsRequestDTO latest = newNewsList.get(0);
@@ -97,7 +97,7 @@ public class NewsService {
                 }
             }
             String title = latest.getNewsTitle();
-            fcmService.sendNotificationToAllExpo("[학교소식]", title + " 외 " + (count - 1) + "개 학교소식이 등록되었습니다.");
+            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개");
         }
 
         // DB 저장
