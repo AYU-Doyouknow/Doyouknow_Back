@@ -21,40 +21,6 @@ public class FcmService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-//    public void sendNotificationToAllUser(String title, String body){
-//        List<Fcm> allToken = fcmRepository.findAll();
-//
-//        for(Fcm fcm : allToken){
-//            sendNotification(fcm.getToken(), title, body);
-//        }
-//    }
-//
-//    public void sendNotification(String token, String title, String body) {
-//        Notification notification = Notification.builder()
-//                .setTitle(title)
-//                .setBody(body)
-//                .build();
-//
-//        Message message = Message.builder()
-//                .setToken(token)
-//                .setNotification(notification)
-//                .build();
-//
-//        try {
-//            String response = FirebaseMessaging.getInstance().send(message);
-//            System.out.println("Successfully sent message: " + response);
-//        } catch (FirebaseMessagingException e){
-//            // 없는 토큰 삭제
-//            if(e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED){
-//                fcmRepository.deleteByToken(token);
-//            } else{
-//                e.printStackTrace();
-//            }
-//        } catch (Exception e){
-//            e.printStackTrace();
-//        }
-//    }
-
     // Expo Push 알림 메서드
     public void sendNotificationToAllExpo(String title, String body) {
         List<Fcm> tokens = fcmRepository.findAll();
@@ -76,36 +42,42 @@ public class FcmService {
             messages.add(message);
         }
 
+        int successCount = 0;
+
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setAccept(List.of(MediaType.ALL));
 
-            HttpEntity<String> request = new HttpEntity<>(
-                    objectMapper.writeValueAsString(messages),
-                    headers
-            );
+            for (int i = 0; i < messages.size(); i += 100) {
+                int end = Math.min(i + 100, messages.size());
+                List<Map<String, Object>> batch = messages.subList(i, end);
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    "https://exp.host/--/api/v2/push/send",
-                    request,
-                    String.class
-            );
+                HttpEntity<String> request = new HttpEntity<>(
+                        objectMapper.writeValueAsString(batch),
+                        headers
+                );
 
-            Map<String, Object> resultMap = objectMapper.readValue(response.getBody(), Map.class);
-            List<Map<String, Object>> responseData = (List<Map<String, Object>>) resultMap.get("data");
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                        "https://exp.host/--/api/v2/push/send",
+                        request,
+                        String.class
+                );
 
-            int successCount = 0;
-            for (Map<String, Object> messageResponse : responseData) {
-                String status = (String) messageResponse.get("status");
-                if ("ok".equalsIgnoreCase(status)) {
-                    successCount++;
-                } else {
-                    Map<String, Object> details = (Map<String, Object>) messageResponse.get("details");
-                    if (details != null && details.containsKey("expoPushToken")) {
-                        String failedToken = (String) details.get("expoPushToken");
-                        System.out.println("🗑️ Deleting invalid token: " + failedToken);
-                        fcmRepository.deleteByToken(failedToken);
+                Map<String, Object> resultMap = objectMapper.readValue(response.getBody(), Map.class);
+                List<Map<String, Object>> responseData = (List<Map<String, Object>>) resultMap.get("data");
+
+                for (Map<String, Object> messageResponse : responseData) {
+                    String status = (String) messageResponse.get("status");
+                    if ("ok".equalsIgnoreCase(status)) {
+                        successCount++;
+                    } else {
+                        Map<String, Object> details = (Map<String, Object>) messageResponse.get("details");
+                        if (details != null && details.containsKey("expoPushToken")) {
+                            String failedToken = (String) details.get("expoPushToken");
+                            System.out.println("🗑️ Deleting invalid token: " + failedToken);
+                            fcmRepository.deleteByToken(failedToken);
+                        }
                     }
                 }
             }
@@ -117,9 +89,6 @@ public class FcmService {
             e.printStackTrace();
         }
     }
-
-
-
 
     public void saveToken(FcmTokenRequestDTO fcmTokenRequestDTO){
         Optional<Fcm> optionalFcm = fcmRepository.findByToken(fcmTokenRequestDTO.getToken());
