@@ -59,6 +59,7 @@ public class SecurityConfig{
                         .requestMatchers("/notice/addNotice").authenticated()
                         .requestMatchers("/lost/addLost").authenticated()
                         .requestMatchers("/news/addNews").authenticated()
+                        .requestMatchers("/fcm/sendMessage").authenticated()
                         .anyRequest().permitAll())
 
                 // 세션 설정 (Session StateLess)
