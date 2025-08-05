@@ -2,11 +2,14 @@ package org.ayu.doyouknowback.news.service;
 
 import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
+import org.ayu.doyouknowback.fcm.service.FcmService;
 import org.ayu.doyouknowback.news.domain.News;
 import org.ayu.doyouknowback.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.news.repository.NewsRepository;
+import org.ayu.doyouknowback.notice.domain.Notice;
+import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +28,9 @@ import java.util.Optional;
 public class NewsService {
 
     private final NewsRepository newsRepository;
+    private final FcmService fcmService;
 
-    /* // 학교소식 저장 (POST)
+    // 학교소식 저장 (POST)
     @Transactional
     public void save(List<NewsRequestDTO> newsRequestDTOList) {
         List<News> newsList = new ArrayList<>();
@@ -36,37 +40,69 @@ public class NewsService {
         }
 
         newsRepository.saveAll(newsList);
-    }*/
+    }
+
     @Transactional
     public void saveLatestNews(List<NewsRequestDTO> newsRequestDTOList) {
+        // 최근 5개 뉴스 가져오기
+        List<News> latestNews = newsRepository.findTop5ByOrderByIdDesc();
 
-        // 1. DB에서 최신 뉴스 5개 가져오기 (id 기준 내림차순)
-        List<News> latestNewsList = newsRepository.findTop5ByOrderByIdDesc();
+        System.out.println("========DB에서 불러온 최근 5개의 학교소식========");
+        for (News news : latestNews) {
+            System.out.println("id: " + news.getId() + ", title: " + news.getNewsTitle());
+        }
 
-        // 2. 저장할 뉴스 리스트 준비
-        List<News> newsListToSave = new ArrayList<>();
+        System.out.println("=======크롤링으로 불러온 최근 5개의 학교소식=======");
+        for(NewsRequestDTO news : newsRequestDTOList){
+            System.out.println("id: " + news.getId() + ", title: " + news.getNewsTitle());
+        }
 
-        // 3. 새로 받은 뉴스들에 대해 중복 여부 확인
-        for (NewsRequestDTO newsRequestDTO : newsRequestDTOList) {
-            boolean isExist = false;
+        // DB에 있는 ID만 모아두기
+        List<Long> dbIds = new ArrayList<>();
+        for (News news : latestNews) {
+            dbIds.add(news.getId());
+        }
 
-            for (News latestNews : latestNewsList) {
-                if (Objects.equals(latestNews.getNewsTitle(), newsRequestDTO.getNewsTitle())) {
-                    isExist = true;
-                    break;
-                }
-            }
-
-            // 4. 중복이 아니면 엔티티로 변환 후 저장 목록에 추가
-            if (!isExist) {
-                newsListToSave.add(News.toSaveEntity(newsRequestDTO));
+        // 새로운 뉴스 리스트 선별
+        List<NewsRequestDTO> newNewsList = new ArrayList<>();
+        for (NewsRequestDTO dto : newsRequestDTOList) {
+            if (!dbIds.contains(dto.getId())) {
+                newNewsList.add(dto);
             }
         }
 
-        // 5. 중복 없는 뉴스들을 DB에 저장
-        newsRepository.saveAll(newsListToSave);
-    }
+        int count = newNewsList.size();
+        System.out.println("새로 등록될 뉴스 수: " + count);
 
+        if (count == 0) {
+            return;
+        }
+
+        // 저장할 뉴스 변환
+        List<News> newsToSave = new ArrayList<>();
+        for (NewsRequestDTO dto : newNewsList) {
+            newsToSave.add(News.toSaveEntity(dto));
+        }
+
+        // 알림 메시지 전송 (1개 또는 여러 개)
+        if (count == 1) {
+            String title = newNewsList.get(0).getNewsTitle();
+            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title);
+        } else {
+            // 가장 ID가 큰 뉴스 제목 선택
+            NewsRequestDTO latest = newNewsList.get(0);
+            for (NewsRequestDTO dto : newNewsList) {
+                if (dto.getId() > latest.getId()) {
+                    latest = dto;
+                }
+            }
+            String title = latest.getNewsTitle();
+            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개");
+        }
+
+        // DB 저장
+        newsRepository.saveAll(newsToSave);
+    }
 
     // 학교소식 전체 조회 (GET)
     @Transactional(readOnly = true)

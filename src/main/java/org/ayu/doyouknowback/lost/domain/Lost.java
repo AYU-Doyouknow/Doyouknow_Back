@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.ayu.doyouknowback.lost.form.LostRequestDTO;
 
 @Entity
 @Builder
@@ -14,15 +15,23 @@ import lombok.NoArgsConstructor;
 public class Lost {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String lostTitle;
-    private String lostDormitory;
-    private String lostLink;
+    private String lostWriter;
     private String lostDate;
-    private int lostViews;
 
     @Column(columnDefinition = "TEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String lostBody;
+
+    public static Lost toSaveEntity(LostRequestDTO lostRequestDTO){
+        return Lost.builder()
+                .id(lostRequestDTO.getId())
+                .lostTitle(lostRequestDTO.getLostTitle())
+                .lostWriter(lostRequestDTO.getLostWriter())
+                .lostDate(lostRequestDTO.getLostDate())
+                .lostBody(lostRequestDTO.getLostBody())
+                .build();
+    }
 }

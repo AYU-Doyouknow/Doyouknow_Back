@@ -10,19 +10,20 @@ import org.ayu.doyouknowback.lost.domain.Lost;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LostResponseDTO {
+public class LostDetailResponseDTO {
     private Long id;
     private String lostTitle;
     private String lostWriter;
     private String lostDate;
+    private String lostBody;
 
-
-    public static LostResponseDTO fromEntity(Lost lost){
-        return LostResponseDTO.builder()
+    public static LostDetailResponseDTO fromEntity(Lost lost){
+        return LostDetailResponseDTO.builder()
                 .id(lost.getId())
                 .lostTitle(lost.getLostTitle())
                 .lostWriter(lost.getLostWriter())
                 .lostDate(lost.getLostDate())
+                .lostBody(lost.getLostBody())
                 .build();
     }
 }

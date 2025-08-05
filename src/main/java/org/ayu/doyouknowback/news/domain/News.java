@@ -14,14 +14,13 @@ import org.ayu.doyouknowback.news.form.NewsRequestDTO;
 @Getter
 public class News {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //글 번호
 
     private String newsTitle;// 타이틀
     private String newsWriter; //작성자
     private String newsDate; //게시일
-    private String newsBody;
-
+    @Column(columnDefinition = "LONGTEXT")
+    private String newsBody; // news 글 내용
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
         return News.builder()
                 .id(newsRequestDTO.getId())
