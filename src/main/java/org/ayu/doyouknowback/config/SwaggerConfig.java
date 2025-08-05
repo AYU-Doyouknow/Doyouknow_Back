@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.news.config;
+package org.ayu.doyouknowback.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
