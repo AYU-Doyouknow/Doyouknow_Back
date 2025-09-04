@@ -14,7 +14,7 @@ import org.ayu.doyouknowback.notice.form.NoticeRequestDTO;
 @Getter
 public class Notice {
 
-    @Id
+    @Id 
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -27,7 +27,8 @@ public class Notice {
     @Column(columnDefinition = "LONGTEXT")
     private String noticeDownloadTitle; //다운로드 제목
     @Column(columnDefinition = "LONGTEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
-    private String noticeBody; // 게시글 내용
+    private String noticeBody; //
+    @Column(columnDefinition = "LONGTEXT")// 게시글 내용
 
     public static Notice toSaveEntity(NoticeRequestDTO noticeRequestDTO){
         // DTO -> Entity
