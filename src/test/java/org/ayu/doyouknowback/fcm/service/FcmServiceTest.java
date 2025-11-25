@@ -1,9 +1,10 @@
 package org.ayu.doyouknowback.fcm.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ayu.doyouknowback.fcm.domain.Fcm;
-import org.ayu.doyouknowback.fcm.form.FcmTokenRequestDTO;
-import org.ayu.doyouknowback.fcm.repository.FcmRepository;
+import org.ayu.doyouknowback.domain.fcm.domain.Fcm;
+import org.ayu.doyouknowback.domain.fcm.form.FcmTokenRequestDTO;
+import org.ayu.doyouknowback.domain.fcm.repository.FcmRepository;
+import org.ayu.doyouknowback.domain.fcm.service.FcmService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

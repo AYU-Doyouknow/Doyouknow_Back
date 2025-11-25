@@ -1,11 +1,12 @@
 package org.ayu.doyouknowback.news.service;
 
-import org.ayu.doyouknowback.fcm.service.FcmService;
-import org.ayu.doyouknowback.news.domain.News;
-import org.ayu.doyouknowback.news.form.NewsDetailResponseDTO;
-import org.ayu.doyouknowback.news.form.NewsRequestDTO;
-import org.ayu.doyouknowback.news.form.NewsResponseDTO;
-import org.ayu.doyouknowback.news.repository.NewsRepository;
+import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.news.domain.News;
+import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
+import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
+import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
+import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
+import org.ayu.doyouknowback.domain.news.service.NewsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
