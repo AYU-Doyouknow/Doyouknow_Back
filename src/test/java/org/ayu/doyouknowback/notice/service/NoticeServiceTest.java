@@ -1,13 +1,13 @@
 package org.ayu.doyouknowback.notice.service;
 
 import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.notice.application.NoticeServiceImpl;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
-import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.domain.notice.infrastructure.NoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class NoticeServiceTest {
         private FcmService fcmService;
 
         @InjectMocks
-        private NoticeService noticeService;
+        private NoticeServiceImpl noticeService;
 
         private Notice testNotice;
         private NoticeRequestDTO testRequestDTO;
