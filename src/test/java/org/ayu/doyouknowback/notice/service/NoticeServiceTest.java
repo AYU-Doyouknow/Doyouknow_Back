@@ -1,13 +1,13 @@
 package org.ayu.doyouknowback.notice.service;
 
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.notice.application.NoticeServiceImpl;
+import org.ayu.doyouknowback.domain.notice.application.port.NoticeNotificationPort;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
-import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
-import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
-import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
-import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.domain.notice.form.response.NoticeDetailResponseDTO;
+import org.ayu.doyouknowback.domain.notice.form.request.NoticeRequestDTO;
+import org.ayu.doyouknowback.domain.notice.form.response.NoticeResponseDTO;
+import org.ayu.doyouknowback.domain.notice.infrastructure.NoticeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,14 @@ class NoticeServiceTest {
         @Mock
         private NoticeRepository noticeRepository;
 
+//        @Mock
+//        private FcmService fcmService;
+
         @Mock
-        private FcmService fcmService;
+        private NoticeNotificationPort noticeNotificationPort;   // ✅ 알림 포트 Mock
 
         @InjectMocks
-        private NoticeService noticeService;
+        private NoticeServiceImpl noticeService;
 
         private Notice testNotice;
         private NoticeRequestDTO testRequestDTO;
@@ -167,8 +170,11 @@ class NoticeServiceTest {
                 noticeService.saveLatestNotice(newNotices);
 
                 verify(noticeRepository, times(1)).saveAll(anyList());
-                verify(fcmService, times(1))
-                                .sendNotificationToAllExpo(anyString(), anyString());
+                // ✅ 알림 포트가 호출되었는지만 검증
+                verify(noticeNotificationPort, times(1))
+                        .notifyNewNotices(anyList());
+//                verify(fcmService, times(1))
+//                                .sendNotificationToAllExpo(anyString(), anyString());
         }
 
         @Test
@@ -182,6 +188,8 @@ class NoticeServiceTest {
                 noticeService.saveLatestNotice(duplicateNotices);
 
                 verify(noticeRepository, never()).saveAll(anyList());
-                verify(fcmService, never()).sendNotificationToAllExpo(anyString(), anyString());
+                verify(noticeNotificationPort, never())
+                        .notifyNewNotices(anyList());
+                //verify(fcmService, never()).sendNotificationToAllExpo(anyString(), anyString());
         }
 }

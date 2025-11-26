@@ -5,7 +5,7 @@ import org.ayu.doyouknowback.domain.lost.form.LostResponseDTO;
 import org.ayu.doyouknowback.domain.news.domain.News;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
-import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
+import org.ayu.doyouknowback.domain.notice.form.response.NoticeResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

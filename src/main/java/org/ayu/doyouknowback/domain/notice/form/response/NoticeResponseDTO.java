@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.domain.notice.form;
+package org.ayu.doyouknowback.domain.notice.form.response;
 
 import lombok.*;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
