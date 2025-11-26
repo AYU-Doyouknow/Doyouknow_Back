@@ -2,7 +2,7 @@ package org.ayu.doyouknowback.domain.notice.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.notice.application.port.NoticeNotificationPort;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
@@ -11,7 +11,6 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.infrastructure.NoticeRepository;
 import org.ayu.doyouknowback.global.util.DtoConversionUtils;
 import org.ayu.doyouknowback.global.util.ItemFilterUtils;
-import org.ayu.doyouknowback.global.util.NotificationMessageUtils;
 import org.ayu.doyouknowback.global.util.PaginationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +27,10 @@ import java.util.List;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeRepository noticeRepository;
-    private final FcmService fcmService;
+    private final NoticeNotificationPort noticeNotificationPort; // ✅ FcmService 대신 포트 의존
 
     /**
-     * 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
+     * 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, 알림 포트를 통해 알림을 보냄
      */
     @Override
     @Transactional
@@ -73,65 +72,37 @@ public class NoticeServiceImpl implements NoticeService {
         // 5. DB에 저장
         noticeRepository.saveAll(noticeListToSave);
 
-        // 6. 알림 메시지 생성 + 발송 (global util 사용)
-        String[] message = NotificationMessageUtils.buildNoticeNotificationMessage(newNotices);
-        if (message != null) {
-            fcmService.sendNotificationToAllExpo(message[0], message[1]);
-        }
+        // 6. 알림 발송은 포트(추상화)에 위임
+        noticeNotificationPort.notifyNewNotices(newNotices);
     }
 
-    /**
-     * 전체 공지 목록 페이징 조회
-     */
     @Override
     public Page<NoticeResponseDTO> findAll(int page, int size, String sort) {
-
-        // 공통 페이징 유틸 사용
         Pageable pageable = PaginationUtils.createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository.findAll(pageable);
-
-        // 공통 DTO 변환 유틸 사용
         return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
     }
 
-    /**
-     * 공지 상세 조회
-     */
     @Override
     public NoticeDetailResponseDTO findById(Long id) {
-
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Not found NoticeDetail with id = " + id));
-
         return NoticeDetailResponseDTO.toDTO(notice);
     }
 
-    /**
-     * 카테고리 별 공지 목록 페이징 조회
-     */
     @Override
     public Page<NoticeResponseDTO> findAllByCategory(String category, int page, int size, String sort) {
-
         Pageable pageable = PaginationUtils.createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository.findByNoticeCategory(category, pageable);
-
         return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
     }
 
-    /**
-     * 제목/본문 검색 결과 페이징 조회
-     */
     @Override
     public Page<NoticeResponseDTO> findAllBySearch(String noticeSearchVal, int page, int size, String sort) {
-
         Pageable pageable = PaginationUtils.createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository
                 .findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
-
         return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
     }
 }
