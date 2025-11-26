@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
+import org.ayu.doyouknowback.domain.notice.form.request.NoticeRequestDTO;
 
 @Entity
 @Builder

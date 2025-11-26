@@ -2,7 +2,7 @@ package org.ayu.doyouknowback.global.util;
 
 import org.ayu.doyouknowback.domain.lost.form.LostRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
-import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
+import org.ayu.doyouknowback.domain.notice.form.request.NoticeRequestDTO;
 
 import java.util.List;
 

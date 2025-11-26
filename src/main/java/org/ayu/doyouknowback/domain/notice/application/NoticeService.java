@@ -1,8 +1,8 @@
 package org.ayu.doyouknowback.domain.notice.application;
 
-import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
-import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
-import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
+import org.ayu.doyouknowback.domain.notice.form.response.NoticeDetailResponseDTO;
+import org.ayu.doyouknowback.domain.notice.form.request.NoticeRequestDTO;
+import org.ayu.doyouknowback.domain.notice.form.response.NoticeResponseDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

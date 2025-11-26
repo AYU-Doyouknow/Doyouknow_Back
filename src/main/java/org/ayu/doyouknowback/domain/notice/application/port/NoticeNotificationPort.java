@@ -1,6 +1,6 @@
 package org.ayu.doyouknowback.domain.notice.application.port;
 
-import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
+import org.ayu.doyouknowback.domain.notice.form.request.NoticeRequestDTO;
 
 import java.util.List;
 
