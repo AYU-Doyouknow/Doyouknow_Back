@@ -1,9 +1,11 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
 
 url = "https://www.anyang.ac.kr/main/communication/notice.do?mode=list&&articleLimit=10&article.offset=0"
 url_main = "https://www.anyang.ac.kr/main/communication/notice.do"
+AUTH_TOKEN = os.environ.get("APP_AUTH_TOKEN")
 
 html_text = requests.get(url)
 
@@ -73,7 +75,12 @@ notice_list.sort(key=lambda x: int(x['id']), reverse=True)
 notice_list = notice_list[:5]
 
 api_url = "https://doyouknow.shop/notice/addNotice"
-response = requests.post(api_url, json=notice_list)
+headers = {
+    "Authorization": "AUTH_TOKEN"
+    "Content-Type": "application/json"
+}
+
+response = requests.post(api_url, json=notice_list, headers=headers)
 
 if response.status_code == 201:
     print("Notices successfully added.")
