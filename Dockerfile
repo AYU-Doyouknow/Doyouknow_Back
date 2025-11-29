@@ -5,7 +5,7 @@
 #EXPOSE 443
 #ENTRYPOINT ["java", "-jar", "app.jar"]
 
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk
 
 # Python3 및 pip 설치
 RUN apt update && apt install -y python3 python3-pip
