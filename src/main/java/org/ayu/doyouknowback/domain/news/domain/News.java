@@ -21,6 +21,8 @@ public class News {
     private String newsDate; //게시일
     @Column(columnDefinition = "LONGTEXT")
     private String newsBody; // news 글 내용
+    @Column(columnDefinition = "LONGTEXT")
+    private String newsUrl; // 게시글 원본 링크
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
         return News.builder()
                 .id(newsRequestDTO.getId())

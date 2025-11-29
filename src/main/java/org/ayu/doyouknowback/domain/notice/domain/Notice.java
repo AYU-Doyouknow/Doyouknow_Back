@@ -28,7 +28,8 @@ public class Notice {
     private String noticeDownloadTitle; //다운로드 제목
     @Column(columnDefinition = "LONGTEXT") // JPA에서 TEXT 타입으로 처리 (65,535자)
     private String noticeBody; // 게시글 내용
-
+    @Column(columnDefinition = "LONGTEXT")
+    private String noticeUrl; // 게시글 원본 링크
     public static Notice toSaveEntity(NoticeRequestDTO noticeRequestDTO){
         // DTO -> Entity
         return Notice.builder()
