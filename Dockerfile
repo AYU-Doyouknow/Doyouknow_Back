@@ -19,7 +19,6 @@ COPY crawling/news.py news.py
 
 # JAR 및 기타 파일 복사
 COPY build/libs/*.jar app.jar
-COPY keystore.p12 keystore.p12
 
 # HTTPS 포트 오픈
 EXPOSE 443
