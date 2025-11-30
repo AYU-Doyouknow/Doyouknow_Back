@@ -1,8 +1,10 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
 url = "https://www.anyang.ac.kr/main/communication/school-news.do?mode=list&&articleLimit=6"
 url_main = "https://www.anyang.ac.kr/main/communication/school-news.do"
+AUTH_TOKEN = os.environ.get("APP_AUTH_TOKEN")
 
 html_text = requests.get(url)
 
@@ -64,7 +66,12 @@ for i in range(len(html_news) - 1, 0, -1):
         })
 
 api_url = "https://doyouknow.shop/news/addNews"
-response = requests.post(api_url, json=news_list)
+headers = {
+    "Authorization": "AUTH_TOKEN",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(api_url, json=news_list, headers=headers)
 
 if response.status_code == 201:
     print("Notices successfully added.")
