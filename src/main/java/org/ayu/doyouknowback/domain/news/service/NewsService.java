@@ -83,7 +83,7 @@ public class NewsService {
         // 알림 메시지 전송 (1개 또는 여러 개)
         if (count == 1) {
             String title = newNewsList.get(0).getNewsTitle();
-            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title);
+            fcmService.sendNotificationToAllExpoWithUrl("이거아냥?", "[학교소식] " + title, "https://doyouknowayu.netlify.app/news/detail/" + newNewsList.get(0).getId());
         } else {
             // 가장 ID가 큰 뉴스 제목 선택
             NewsRequestDTO latest = newNewsList.get(0);
@@ -93,7 +93,7 @@ public class NewsService {
                 }
             }
             String title = latest.getNewsTitle();
-            fcmService.sendNotificationToAllExpo("이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개");
+            fcmService.sendNotificationToAllExpoWithUrl("이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개", "https://doyouknowayu.netlify.app/news");
         }
 
         // DB 저장

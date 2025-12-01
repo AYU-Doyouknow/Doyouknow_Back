@@ -2,82 +2,124 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
-
-url = "https://www.anyang.ac.kr/main/communication/notice.do?mode=list&&articleLimit=10&article.offset=0"
-url_main = "https://www.anyang.ac.kr/main/communication/notice.do"
+BASE_URL = "https://www.anyang.ac.kr"
+LIST_URL = f"{BASE_URL}/main/communication/notice.do"
 AUTH_TOKEN = os.environ.get("APP_AUTH_TOKEN")
 
-html_text = requests.get(url)
+# 리스트 URL
+url = f"{LIST_URL}?mode=list&articleLimit=10&article.offset=0"
 
+html_text = requests.get(url)
 html = BeautifulSoup(html_text.text, "html.parser")
-html_notice = html.select("#cms-content > div > div > div.bn-list-common01.type01.bn-common-cate > table > tbody > tr")
+html_notice = html.select(
+    "#cms-content > div > div > div.bn-list-common01.type01.bn-common-cate > table > tbody > tr"
+)
 
 notice_list = []
 
+
+def build_full_url(href: str) -> str:
+    """상대 경로를 절대 URL로 변환"""
+    if not href:
+        return ""
+    href = href.strip()
+    if href.startswith("http"):
+        return href
+    if href.startswith("/"):
+        return BASE_URL + href
+    return LIST_URL + href
+
+
 for i in range(len(html_notice) - 1, 0, -1):
-    notice = html.select(f"#cms-content > div > div > div.bn-list-common01.type01.bn-common-cate > table > tbody > tr:nth-child({i})")
-    if notice:
-        notice = notice[0]
+    notice = html.select(
+        f"#cms-content > div > div > div.bn-list-common01.type01.bn-common-cate > table > tbody > tr:nth-child({i})"
+    )
+    if not notice:
+        continue
 
-        title_element = notice.select_one("td.b-td-left.b-td-title > div > a")
-        title = title_element.get("title") if title_element else "No title"
-        title = title.replace(" 자세히 보기", "")
-        link_add = title_element.get("href") if title_element else "#"
-        link = url_main + link_add
+    notice = notice[0]
 
-        parts = link_add.split("&")
-        for part in parts:
-            if "articleNo=" in part:
-                articleId = part.split("=")[1]
-                break
+    title_element = notice.select_one("td.b-td-left.b-td-title > div > a")
+    title = title_element.get("title") if title_element else "No title"
+    title = title.replace(" 자세히 보기", "")
 
-        category = notice.select_one("td.b-cate-box").text.strip() if notice.select_one("td.b-cate-box") else "No category"
-        writer = notice.select_one("td:nth-child(4)").text.strip() if notice.select_one("td:nth-child(4)") else "No writer"
-        date = notice.select_one("td:nth-child(5)").text.strip() if notice.select_one("td:nth-child(5)") else "No date"
+    link_add = title_element.get("href") if title_element else "#"
+    notice_url = build_full_url(link_add)  # ← URL 100% 정확하게 생성
 
-        try:
-            html_text_2 = requests.get(link)
-            html_2 = BeautifulSoup(html_text_2.text, "html.parser")
+    # articleNo 추출
+    articleId = None
+    for part in link_add.split("&"):
+        if "articleNo=" in part:
+            articleId = part.split("=")[1]
+            break
+    if articleId is None:
+        continue
 
-            download_html = html_2.select_one(".b-file-box > ul")
-            if download_html:
-                download_items = download_html.find_all('li')
-                download_link = ''
-                download_title = ''
-                for item in download_items:
-                    a_tag = item.find('a')
-                    if a_tag:
-                        download_link = url_main + a_tag['href'] + ', ' + download_link
-                        download_title = a_tag.text.strip() + ', ' + download_title
-            else:
-                download_link = ''
-                download_title = ''
+    category = (
+        notice.select_one("td.b-cate-box").text.strip()
+        if notice.select_one("td.b-cate-box")
+        else "No category"
+    )
+    writer = (
+        notice.select_one("td:nth-child(4)").text.strip()
+        if notice.select_one("td:nth-child(4)")
+        else "No writer"
+    )
+    date = (
+        notice.select_one("td:nth-child(5)").text.strip()
+        if notice.select_one("td:nth-child(5)")
+        else "No date"
+    )
 
-            body = html_2.select_one(".b-content-box")
+    try:
+        html_text_2 = requests.get(notice_url)
+        html_2 = BeautifulSoup(html_text_2.text, "html.parser")
 
-        except requests.RequestException as e:
-            print(f"Error fetching {link}: {e}")
+        download_html = html_2.select_one(".b-file-box > ul")
+        if download_html:
+            download_items = download_html.find_all("li")
+            download_link = ""
+            download_title = ""
+            for item in download_items:
+                a_tag = item.find("a")
+                if a_tag:
+                    file_url = build_full_url(a_tag["href"])
+                    download_link = file_url + ", " + download_link
+                    download_title = a_tag.text.strip() + ", " + download_title
+        else:
+            download_link = ""
+            download_title = ""
 
-        notice_list.append({
-            "id" : articleId,
+        body = html_2.select_one(".b-content-box")
+
+    except requests.RequestException as e:
+        print(f"Error fetching {notice_url}: {e}")
+        body = None
+        download_link = ""
+        download_title = ""
+
+    notice_list.append(
+        {
+            "id": articleId,
             "noticeTitle": str(title),
             "noticeWriter": str(writer),
-            "noticeLink": str(link),
+            "noticeUrl": str(notice_url),
             "noticeDate": str(date),
             "noticeCategory": str(category),
-            "noticeBody" : str(body),
-            "noticeDownloadLink" : str(download_link),
-            "noticeDownloadTitle" : str(download_title)
-        })
+            "noticeBody": str(body),
+            "noticeDownloadLink": str(download_link),
+            "noticeDownloadTitle": str(download_title),
+        }
+    )
 
 # 내림차순 정렬 (id 기준)
-notice_list.sort(key=lambda x: int(x['id']), reverse=True)
+notice_list.sort(key=lambda x: int(x["id"]), reverse=True)
 notice_list = notice_list[:5]
 
 api_url = "https://doyouknow.shop/notice/addNotice"
 headers = {
-    "Authorization": "AUTH_TOKEN"
-    "Content-Type": "application/json"
+    "Authorization": AUTH_TOKEN,
+    "Content-Type": "application/json",
 }
 
 response = requests.post(api_url, json=notice_list, headers=headers)
@@ -86,3 +128,5 @@ if response.status_code == 201:
     print("Notices successfully added.")
 else:
     print("Failed to add notices.")
+    print("Status:", response.status_code)
+    print("Response:", response.text)
