@@ -23,6 +23,7 @@ public class News {
     private String newsBody; // news 글 내용
     @Column(columnDefinition = "LONGTEXT")
     private String newsUrl; // 게시글 원본 링크
+
     public static News toSaveEntity(NewsRequestDTO newsRequestDTO) {
         return News.builder()
                 .id(newsRequestDTO.getId())
@@ -30,6 +31,7 @@ public class News {
                 .newsWriter(newsRequestDTO.getNewsWriter())
                 .newsDate(newsRequestDTO.getNewsDate())
                 .newsBody(newsRequestDTO.getNewsBody())
+                .newsUrl(newsRequestDTO.getNewsUrl())
                 .build();
     }
 }
