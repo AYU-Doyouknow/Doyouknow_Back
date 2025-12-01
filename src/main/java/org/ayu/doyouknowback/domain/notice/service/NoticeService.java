@@ -78,6 +78,7 @@ public class NoticeService {
 
         // 알림 발송
         if (count == 1) {
+            System.out.println("새로운 공지 아이디 : " + newNotices.get(0).getId());
             String title = newNotices.get(0).getNoticeTitle();
             fcmService.sendNotificationToAllExpoWithUrl("이거아냥?", "[공지사항] " + title, "https://doyouknowayu.netlify.app/notice/detail/" + newNotices.get(0).getId());
         } else {
