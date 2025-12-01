@@ -79,7 +79,7 @@ public class NoticeService {
         // 알림 발송
         if (count == 1) {
             String title = newNotices.get(0).getNoticeTitle();
-            fcmService.sendNotificationToAllExpo("이거아냥?", "[공지사항] " + title);
+            fcmService.sendNotificationToAllExpoWithUrl("이거아냥?", "[공지사항] " + title, "https://doyouknowayu.netlify.app/notice/detail/" + newNotices.get(0).getId());
         } else {
             NoticeRequestDTO latest = newNotices.get(0);
             for (NoticeRequestDTO dto : newNotices) {
@@ -88,7 +88,7 @@ public class NoticeService {
                 }
             }
             String title = latest.getNoticeTitle();
-            fcmService.sendNotificationToAllExpo("이거아냥?", "[공지사항] " + title + " 외 " + (count - 1) + "개");
+            fcmService.sendNotificationToAllExpoWithUrl("이거아냥?", "[공지사항] " + title + " 외 " + (count - 1) + "개", "https://doyouknowayu.netlify.app/notice");
         }
 
         // DB에 저장
