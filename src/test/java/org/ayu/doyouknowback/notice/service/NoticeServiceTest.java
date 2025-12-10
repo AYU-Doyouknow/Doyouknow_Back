@@ -8,6 +8,7 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.domain.notice.service.NoticeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +37,9 @@ class NoticeServiceTest {
         @Mock
         private FcmService fcmService;
 
+        // Interface 로 정의된 NoticeService 의 구현체(NoticeServiceImpl)를 주입하였습니다.
         @InjectMocks
-        private NoticeService noticeService;
+        private NoticeServiceImpl noticeService;
 
         private Notice testNotice;
         private NoticeRequestDTO testRequestDTO;
