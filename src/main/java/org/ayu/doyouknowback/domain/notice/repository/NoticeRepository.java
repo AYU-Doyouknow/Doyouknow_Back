@@ -26,14 +26,4 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @NonNull
     Page<Notice> findByNoticeTitleContainingOrNoticeBodyContaining(String value, String value1, Pageable pageable);
 
-    // findByNoticeTitleContaining : 키워드 기준으로 검색하되, 쿼리로 작성(공지 제목, 작성자, 내용 필드 값 전부 참조)
-//    @Query("select "
-//            + "distinct n "
-//            + "from Notice n "
-//            + "where "
-//            + "   n.noticeTitle like %:kw% "
-//            + "   or n.noticeWriter like %:kw% "
-//            + "   or n.noticeBody like %:kw% ")
-//    Page<Notice> findAllByKeyWord(@Param("kw") String noticeSearchVal, Pageable pageable);
-
 }
