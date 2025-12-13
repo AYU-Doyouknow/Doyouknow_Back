@@ -76,7 +76,7 @@ public class NoticeServiceImpl implements NoticeService {
         // 6. 알림 메시지 생성 + FCM 발송 (공통 유틸 + FcmService)
         String[] message = NotificationMessageUtils.buildNoticeNotificationMessage(newNotices);
         if (message != null) {
-            fcmService.sendNotificationToAllExpo(message[0], message[1]);
+            fcmService.sendNotificationToAllExpoWithUrl(message[0], message[1], message[2]);
         }
     }
 

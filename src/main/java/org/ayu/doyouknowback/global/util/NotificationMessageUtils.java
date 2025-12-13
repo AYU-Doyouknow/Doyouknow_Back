@@ -35,12 +35,12 @@ public class NotificationMessageUtils {
 
         if (count == 1) {
             String title = newItems.get(0).getNoticeTitle();
-            return new String[]{"이거아냥?", "[공지사항] " + title};
+            return new String[]{"이거아냥?", "[공지사항] " + title, "https://doyouknowayu.netlify.app/notice"};
         } else {
             // 가장 ID가 큰 항목 찾기
             NoticeRequestDTO latest = ItemFilterUtils.findLatestNoticeItem(newItems);
             String title = latest.getNoticeTitle();
-            return new String[]{"이거아냥?", "[공지사항] " + title + " 외 " + (count - 1) + "개"};
+            return new String[]{"이거아냥?", "[공지사항] " + title + " 외 " + (count - 1) + "개", "https://doyouknowayu.netlify.app/notice/detail/" + newItems.get(0).getId()};
         }
     }
 
@@ -67,12 +67,12 @@ public class NotificationMessageUtils {
         
         if (count == 1) {
             String title = newItems.get(0).getNewsTitle();
-            return new String[]{"이거아냥?", "[학교소식] " + title};
+            return new String[]{"이거아냥?", "[학교소식] " + title, "https://doyouknowayu.netlify.app/news"};
         } else {
             // 가장 ID가 큰 항목 찾기
             NewsRequestDTO latest = ItemFilterUtils.findLatestNewsItem(newItems);
             String title = latest.getNewsTitle();
-            return new String[]{"이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개"};
+            return new String[]{"이거아냥?", "[학교소식] " + title + " 외 " + (count - 1) + "개", "https://doyouknowayu.netlify.app/news/detail/" + newItems.get(0).getId()};
         }
     }
 
