@@ -20,8 +20,13 @@ public class FcmService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Expo Push 알림 메서드
+    // Expo Push 알림 메서드 (URL 없이)
     public void sendNotificationToAllExpo(String title, String body) {
+        sendNotificationToAllExpoWithUrl(title, body, null);
+    }
+
+    // Expo Push 알림 메서드 (URL 포함)
+    public void sendNotificationToAllExpoWithUrl(String title, String body, String url) {
         List<Fcm> tokens = fcmRepository.findAll();
         int totalCount = tokens.size();
 
@@ -37,6 +42,13 @@ public class FcmService {
             message.put("title", title);
             message.put("body", body);
             message.put("sound", "default");
+
+            // URL이 있으면 data 필드 추가
+            if (url != null && !url.isEmpty()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("url", url);
+                message.put("data", data);
+            }
 
             messages.add(message);
         }
@@ -99,6 +111,5 @@ public class FcmService {
         Fcm fcm = Fcm.toSaveEntity(fcmTokenRequestDTO);
         fcmRepository.save(fcm);
     }
-
 
 }

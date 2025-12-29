@@ -30,6 +30,7 @@ public class Notice {
     private String noticeBody; // 게시글 내용
     @Column(columnDefinition = "LONGTEXT")
     private String noticeUrl; // 게시글 원본 링크
+
     public static Notice toSaveEntity(NoticeRequestDTO noticeRequestDTO){
         // DTO -> Entity
         return Notice.builder()
@@ -41,6 +42,7 @@ public class Notice {
                 .noticeBody(noticeRequestDTO.getNoticeBody())
                 .noticeDownloadLink(noticeRequestDTO.getNoticeDownloadLink())
                 .noticeDownloadTitle(noticeRequestDTO.getNoticeDownloadTitle())
+                .noticeUrl(noticeRequestDTO.getNoticeUrl())
                 .build();
     }
 }
