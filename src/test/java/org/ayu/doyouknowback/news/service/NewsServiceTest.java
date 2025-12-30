@@ -6,7 +6,7 @@ import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
-import org.ayu.doyouknowback.domain.news.service.NewsService;
+import org.ayu.doyouknowback.domain.news.service.NewsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class NewsServiceTest {
     private FcmService fcmService;
 
     @InjectMocks
-    private NewsService newsService;
+    private NewsServiceImpl newsService;
 
     private News testNews;
     private NewsRequestDTO testRequestDTO;
@@ -128,15 +128,6 @@ class NewsServiceTest {
         verify(newsRepository, times(1)).findTop5ByOrderByIdDesc();
     }
 
-    @Test
-    @DisplayName("학교소식 저장 - save 메서드")
-    void save_ShouldSaveAllNews() {
-        List<NewsRequestDTO> newsRequestDTOList = Arrays.asList(testRequestDTO);
-
-        newsService.save(newsRequestDTOList);
-
-        verify(newsRepository, times(1)).saveAll(anyList());
-    }
 
     @Test
     @DisplayName("최신 학교소식 저장 - 새로운 뉴스 저장")
@@ -157,7 +148,7 @@ class NewsServiceTest {
 
         verify(newsRepository, times(1)).saveAll(anyList());
         verify(fcmService, times(1))
-                .sendNotificationToAllExpo(anyString(), anyString());
+                .sendNotificationToAllExpoWithUrl(anyString(), anyString(), anyString());
     }
 
     @Test
