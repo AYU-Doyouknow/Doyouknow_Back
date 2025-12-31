@@ -25,7 +25,7 @@ public class FcmController {
 
     @PostMapping("/sendMessage")
     public ResponseEntity<String> sendMessage(@RequestBody FcmSendMessageReqeustDTO fcmSendMessageReqeustDTO) {
-        fcmService.sendNotificationToAllExpo(fcmSendMessageReqeustDTO.getTitle(), fcmSendMessageReqeustDTO.getBody());
+        fcmService.sendNotificationToAllExpoWithUrl(fcmSendMessageReqeustDTO.getTitle(), fcmSendMessageReqeustDTO.getBody(), null);
         return ResponseEntity.ok("메세지 전송 완료");
     }
 }

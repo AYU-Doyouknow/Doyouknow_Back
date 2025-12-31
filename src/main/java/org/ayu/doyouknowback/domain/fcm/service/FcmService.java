@@ -7,6 +7,7 @@ import org.ayu.doyouknowback.domain.fcm.domain.Fcm;
 import org.ayu.doyouknowback.domain.fcm.form.FcmTokenRequestDTO;
 import org.ayu.doyouknowback.domain.fcm.repository.FcmRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import java.util.*;
@@ -26,6 +27,7 @@ public class FcmService {
     }
 
     // Expo Push 알림 메서드 (URL 포함)
+    @Transactional
     public void sendNotificationToAllExpoWithUrl(String title, String body, String url) {
         List<Fcm> tokens = fcmRepository.findAll();
         int totalCount = tokens.size();
@@ -54,6 +56,7 @@ public class FcmService {
         }
 
         int successCount = 0;
+        int failCount = 0;
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -86,14 +89,14 @@ public class FcmService {
                         Map<String, Object> details = (Map<String, Object>) messageResponse.get("details");
                         if (details != null && details.containsKey("expoPushToken")) {
                             String failedToken = (String) details.get("expoPushToken");
-                            System.out.println("🗑️ Deleting invalid token: " + failedToken);
+                            failCount++;
                             fcmRepository.deleteByToken(failedToken);
                         }
                     }
                 }
             }
 
-            System.out.println("Push notification sent to " + totalCount + " users (success: " + successCount + ", fail: " + (totalCount - successCount) + ")");
+            System.out.println("Push notification sent to " + totalCount + " users (success: " + successCount + ", fail: " + failCount + ")");
 
         } catch (Exception e) {
             System.out.println("Failed to send Expo push notification");
@@ -101,6 +104,7 @@ public class FcmService {
         }
     }
 
+    @Transactional
     public void saveToken(FcmTokenRequestDTO fcmTokenRequestDTO){
         Optional<Fcm> optionalFcm = fcmRepository.findByToken(fcmTokenRequestDTO.getToken());
 
