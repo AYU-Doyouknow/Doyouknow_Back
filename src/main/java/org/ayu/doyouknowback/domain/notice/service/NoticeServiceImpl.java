@@ -9,11 +9,10 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.ayu.doyouknowback.global.util.DtoConversionUtils;
-import org.ayu.doyouknowback.global.util.ItemFilterUtils;
-import org.ayu.doyouknowback.global.util.NotificationMessageUtils;
-import org.ayu.doyouknowback.global.util.PaginationUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,105 +27,140 @@ import java.util.List;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeRepository noticeRepository;
-    private final FcmService fcmService;   // ✅ 포트 대신 FcmService 직접 주입
+    private final FcmService fcmService;
 
-    /**
-     * 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
-     */
+    // 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
     @Override
     @Transactional
     public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList) {
 
-        // 1. 최근 5개의 공지사항 가져오기
+        // 1. DB에서 최근 5개 공지사항 조회
         List<Notice> latestNotices = noticeRepository.findTop5ByOrderByIdDesc();
 
-        log.debug("========DB에서 불러온 최근 5개의 공지사항========");
+        log.info("========DB에서 불러온 최근 5개의 공지사항========");
         for (Notice notice : latestNotices) {
-            log.debug("id: {}, title: {}", notice.getId(), notice.getNoticeTitle());
+            log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
         }
 
-        log.debug("=======크롤링으로 불러온 최근 공지사항=======");
+        log.info("========크롤링으로 불러온 최근 5개의 공지사항========");
         for (NoticeRequestDTO notice : noticeRequestDTOList) {
-            log.debug("id: {}, title: {}", notice.getId(), notice.getNoticeTitle());
+            log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
         }
 
-        // 2. DB에 있는 ID 목록 추출 (공통 유틸 사용)
-        List<Long> dbIds = ItemFilterUtils.extractIdsFromNotice(latestNotices);
+        // 2. 크롤링된 공지를 Entity로 변환
+        List<Notice> crawledNotices = Notice.fromList(noticeRequestDTOList);
 
-        // 3. 신규 공지사항만 필터링 (공통 유틸 사용)
-        List<NoticeRequestDTO> newNotices =
-                ItemFilterUtils.filterNewNoticeItems(noticeRequestDTOList, dbIds);
+        // 3. 새로운 공지만 필터링
+        List<Notice> newNoticesList = Notice.filterNewNotices(crawledNotices, latestNotices);
 
-        int count = newNotices.size();
-        log.info("새로 등록될 공지사항 수: {}", count);
+        int count = newNoticesList.size();
+        log.info("새로 등록될 공지사항 수 : {}", count);
 
         if (count == 0) {
             return;
         }
 
-        // 4. DTO → 엔티티 변환 후 저장 목록 구성
-        List<Notice> noticeListToSave = new ArrayList<>();
-        for (NoticeRequestDTO dto : newNotices) {
-            noticeListToSave.add(Notice.toSaveEntity(dto));
-        }
+        // 4. 데이터 저장
+        noticeRepository.saveAll(newNoticesList);
 
-        // 5. DB에 저장
-        noticeRepository.saveAll(noticeListToSave);
-
-        // 6. 알림 메시지 생성 + FCM 발송 (공통 유틸 + FcmService)
-        String[] message = NotificationMessageUtils.buildNoticeNotificationMessage(newNotices);
-        if (message != null) {
-            fcmService.sendNotificationToAllExpoWithUrl(message[0], message[1], message[2]);
-        }
+        // 5. 알림 전송
+        sendNotification(newNoticesList, count);
     }
 
-    /**
-     * 전체 공지 목록 페이징 조회
-     */
+    // 전체 공지 목록 페이징 조회
     @Override
+    @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAll(int page, int size, String sort) {
+        // Pageable 생성
+        Pageable pageable = createPageable(page, size, sort);
 
-        Pageable pageable = PaginationUtils.createPageable(page, size, sort);
+        // Repository 조회
         Page<Notice> noticePage = noticeRepository.findAll(pageable);
 
-        return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
+        // Entity -> DTO 변환
+        List<NoticeResponseDTO> dtoList = new ArrayList<>();
+        for (Notice notice : noticePage.getContent()) {
+            dtoList.add(NoticeResponseDTO.toDTO(notice));
+        }
+
+        return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
 
-    /**
-     * 공지 상세 조회
-     */
+    // 공지 상세 조회
     @Override
+    @Transactional(readOnly = true)
     public NoticeDetailResponseDTO findById(Long id) {
-
         Notice notice = noticeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Not found NoticeDetail with id = " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Not found NoticeDetail with id = " + id));
 
         return NoticeDetailResponseDTO.toDTO(notice);
     }
 
-    /**
-     * 카테고리 별 공지 목록 페이징 조회
-     */
+    // 카테고리 별 공지 목록 페이징 조회
     @Override
+    @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllByCategory(String category, int page, int size, String sort) {
+        // Pageable 생성
+        Pageable pageable = createPageable(page, size, sort);
 
-        Pageable pageable = PaginationUtils.createPageable(page, size, sort);
+        // Repository 조회
         Page<Notice> noticePage = noticeRepository.findByNoticeCategory(category, pageable);
 
-        return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
+        // Entity -> DTO 변환
+        List<NoticeResponseDTO> dtoList = new ArrayList<>();
+        for (Notice notice : noticePage.getContent()) {
+            dtoList.add(NoticeResponseDTO.toDTO(notice));
+        }
+
+        return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
 
-    /**
-     * 제목/본문 검색 결과 페이징 조회
-     */
+    // 제목/본문 검색 결과 페이징 조회
     @Override
+    @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllBySearch(String noticeSearchVal, int page, int size, String sort) {
+        // Pageable 생성
+        Pageable pageable = createPageable(page, size, sort);
 
-        Pageable pageable = PaginationUtils.createPageable(page, size, sort);
+        // Repository 조회
         Page<Notice> noticePage = noticeRepository
                 .findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
 
-        return DtoConversionUtils.convertNoticePageToDto(noticePage, pageable);
+        // Entity -> DTO 변환
+        List<NoticeResponseDTO> dtoList = new ArrayList<>();
+        for (Notice notice : noticePage.getContent()) {
+            dtoList.add(NoticeResponseDTO.toDTO(notice));
+        }
+
+        return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
+    }
+
+    // 알림 전송 - Entity의 도메인 로직 활용
+    private void sendNotification(List<Notice> newNoticesList, int count) {
+        if (count == 1) {
+            // 단일 공지: 상세 페이지로 이동
+            Notice singleNotice = newNoticesList.get(0);
+            fcmService.sendNotificationToAllExpoWithUrl(
+                    "이거아냥?",
+                    singleNotice.createNotificationTitle(),
+                    singleNotice.createDetailUrl());
+        } else {
+            // 여러 공지: 목록 페이지로 이동
+            Notice latestNotice = newNoticesList.get(0);
+            fcmService.sendNotificationToAllExpoWithUrl(
+                    "이거아냥?",
+                    latestNotice.createMultipleNoticesNotificationBody(count),
+                    Notice.getNoticeListUrl());
+        }
+    }
+
+    // Pageable 객체 생성
+    private Pageable createPageable(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "desc";
+
+        Sort sorting = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        return PageRequest.of(page, size, sorting);
     }
 }
