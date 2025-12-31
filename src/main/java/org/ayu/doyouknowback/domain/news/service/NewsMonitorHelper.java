@@ -39,19 +39,19 @@ public class NewsMonitorHelper {
     @Monitored("PUSH_NOTIFICATION")
     public void sendNotification(List<News> newNewsList, int count) {
         if (count == 1) {
-            // 단일 뉴스: 상세 페이지로 이동
             News singleNews = newNewsList.get(0);
-            fcmService.sendNotificationToAllExpoWithUrl(
+            fcmService.sendNotificationAsync(
                     "이거아냥?",
                     singleNews.createNotificationTitle(),
                     singleNews.createDetailUrl());
         } else {
-            // 여러 뉴스: 목록 페이지로 이동
             News latestNews = newNewsList.get(0);
-            fcmService.sendNotificationToAllExpoWithUrl(
+            fcmService.sendNotificationAsync(
                     "이거아냥?",
                     latestNews.createMultipleNewsNotificationBody(count),
                     News.getNewsListUrl());
         }
+
+        log.info("푸시 알림 비동기 큐잉 완료 (백그라운드 실행 중)");
     }
 }

@@ -6,11 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.ayu.doyouknowback.domain.fcm.domain.Fcm;
 import org.ayu.doyouknowback.domain.fcm.form.FcmTokenRequestDTO;
 import org.ayu.doyouknowback.domain.fcm.repository.FcmRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,17 @@ public class FcmService {
     private final FcmRepository fcmRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Async("pushNotificationExecutor")
+    public CompletableFuture<Void> sendNotificationAsync(String title, String body, String url) {
+        log.info("비동기 푸시 알림 시작 - Thread: {}", Thread.currentThread().getName());
+
+        sendNotificationToAllExpoWithUrl(title, body, url);
+
+        log.info("비동기 푸시 알림 완료 - Thread: {}", Thread.currentThread().getName());
+
+        return CompletableFuture.completedFuture(null);
+    }
 
     // Expo Push 알림 메서드 (URL 없이)
     public void sendNotificationToAllExpo(String title, String body) {
