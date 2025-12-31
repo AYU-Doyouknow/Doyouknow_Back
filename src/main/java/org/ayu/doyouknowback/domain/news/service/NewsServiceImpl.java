@@ -114,22 +114,6 @@ public class NewsServiceImpl implements NewsService {
         return new PageImpl<>(dtoList, pageable, newsPage.getTotalElements());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<NewsResponseDTO> getTop5LatestNews() {
-        // Repository 조회
-        List<News> newsList = newsRepository.findTop5ByOrderByIdDesc();
-
-        // Entity -> DTO 변환
-        List<NewsResponseDTO> result = new ArrayList<>();
-        for (News news : newsList) {
-            result.add(NewsResponseDTO.fromEntity(news));
-        }
-
-        return result;
-    }
-
-
     private void sendNotification(List<News> newNewsList, int count) {
         if (count == 1) {
             // 단일 뉴스: 상세 페이지로 이동

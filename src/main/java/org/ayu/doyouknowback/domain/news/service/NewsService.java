@@ -28,9 +28,4 @@ public interface NewsService {
      * 뉴스 제목 또는 본문 검색
      */
     Page<NewsResponseDTO> searchByTitle(String keyword, int page, int size, String sort);
-
-    /**
-     * 최근 5개 뉴스 조회
-     */
-    List<NewsResponseDTO> getTop5LatestNews();
 }
