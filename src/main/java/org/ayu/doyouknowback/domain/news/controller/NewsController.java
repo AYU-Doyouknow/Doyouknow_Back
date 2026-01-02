@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
-import org.ayu.doyouknowback.domain.news.service.NewsServiceImpl;
+import org.ayu.doyouknowback.domain.news.service.NewsService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/news")
 public class NewsController {
-    private final NewsServiceImpl newsService;
+
+    private final NewsService newsService;
+
+    public NewsController(@Qualifier("newsProduct") NewsService newsService){
+        this.newsService = newsService;
+    }
 
     @GetMapping("/all")
     public ResponseEntity<Page<NewsResponseDTO>> getAllNews(
