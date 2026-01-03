@@ -1,6 +1,5 @@
 package org.ayu.doyouknowback.domain.news.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
