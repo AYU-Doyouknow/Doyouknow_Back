@@ -1,6 +1,5 @@
 package org.ayu.doyouknowback.notice.service;
 
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
