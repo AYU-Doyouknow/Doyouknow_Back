@@ -2,6 +2,7 @@ package org.ayu.doyouknowback.domain.lost.service;
 
 import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.lost.domain.Lost;
 import org.ayu.doyouknowback.domain.lost.form.LostDetailResponseDTO;
 import org.ayu.doyouknowback.domain.lost.form.LostRequestDTO;
@@ -14,25 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class LostService {
 
     private final LostRepository lostRepository;
     private final NotificationPushService notificationPushService;
 
-    // @Transactional(readOnly = true)
-    // //jpa는 자동적으로 변경감지를 수행해서 엔티티의 변경 여부를 감시한다.
-    // //readOnly=true를 사용하면 변경 감지가 비활성화 되어 성능이 향상된다.
-    // public List<LostResponseDTO> getAll() {
-    // List<Lost> lostEntityList = lostRepository.findAll();
-    // List<LostResponseDTO> lostResponseList = new ArrayList<>();
-    //
-    // for(Lost lost : lostEntityList){
-    // lostResponseList.add(LostResponseDTO.fromEntity(lost));
-    // }
-    //
-    // return lostResponseList;
-    // }
+    public LostService(
+            LostRepository lostRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.lostRepository = lostRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Transactional(readOnly = true)
     public Page<LostResponseDTO> getAll(int page, int size, String sort) {

@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
-@Service
+@Service("restTemplatePushService")
 @RequiredArgsConstructor
 public class NotificationPushServiceImpl implements NotificationPushService {
 
@@ -59,8 +59,7 @@ public class NotificationPushServiceImpl implements NotificationPushService {
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
 
-        log.info("비동기 푸시 알림 완료 - Thread: {}, 실행 시간: {}ms",
-                Thread.currentThread().getName(), executionTime);
+        log.info("비동기 푸시 알림 완료 - Thread: {}, 실행 시간: {}ms", Thread.currentThread().getName(), executionTime);
 
         return CompletableFuture.completedFuture(null);
     }

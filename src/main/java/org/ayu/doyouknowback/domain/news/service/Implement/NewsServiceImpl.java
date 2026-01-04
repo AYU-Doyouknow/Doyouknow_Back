@@ -3,6 +3,7 @@ package org.ayu.doyouknowback.domain.news.service.Implement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.news.domain.News;
 import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
@@ -23,11 +24,17 @@ import java.util.Optional;
 
 @Slf4j
 @Service("newsProduct")
-@RequiredArgsConstructor
 public class NewsServiceImpl implements NewsService {
 
     private final NewsRepository newsRepository;
     private final NotificationPushService notificationPushService;
+
+    public NewsServiceImpl(
+            NewsRepository newsRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.newsRepository = newsRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Override
     @Transactional
