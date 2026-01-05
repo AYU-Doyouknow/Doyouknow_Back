@@ -1,36 +1,52 @@
-package org.ayu.doyouknowback.domain.news.service;
+package org.ayu.doyouknowback.domain.news.service.Implement;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.news.domain.News;
 import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
-import org.ayu.doyouknowback.global.monitoring.Monitored;
-import org.springframework.data.domain.*;
+import org.ayu.doyouknowback.domain.news.service.NewsService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Service("newsMonitor")
-@RequiredArgsConstructor
-public class NewsServiceMonitorImpl implements NewsService{
+@Service("newsProduct")
+public class NewsServiceImpl implements NewsService {
 
     private final NewsRepository newsRepository;
-    private final NewsMonitorHelper newsHelper;
+    private final NotificationPushService notificationPushService;
+
+    public NewsServiceImpl(
+            NewsRepository newsRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.newsRepository = newsRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Override
     @Transactional
-    @Monitored("TOTAL")
     public void saveLatestNews(List<NewsRequestDTO> newsRequestDTOList) {
 
-        // 1. DB에서 최근 5개 뉴스 조회 (AOP 자동 측정)
-        List<News> latestNews = newsHelper.findTop5News();
+        // 1. DB에서 최근 5개 뉴스 조회
+        List<News> latestNews = newsRepository.findTop5ByOrderByIdDesc();
+
+        log.info("========DB에서 불러온 최근 5개의 학교소식========");
+        for (News news : latestNews) {
+            log.info("id : {}, title : {}", news.getId(), news.getNewsTitle());
+        }
 
         log.info("========크롤링으로 불러온 최근 5개의 학교소식========");
         for (NewsRequestDTO news : newsRequestDTOList) {
@@ -44,18 +60,17 @@ public class NewsServiceMonitorImpl implements NewsService{
         List<News> newNewsList = News.filterNewNews(crawledNews, latestNews);
 
         int count = newNewsList.size();
-
         log.info("새로 등록될 뉴스 수 : {}", count);
 
         if (count == 0) {
             return;
         }
 
-        // 4. 데이터 저장 (AOP 자동 측정)
-        newsHelper.saveNews(newNewsList);
+        // 4. 데이터 저장
+        newsRepository.saveAll(newNewsList);
 
-        // 5. 알림 전송 (AOP 자동 측정)
-        newsHelper.sendNotification(newNewsList, count);
+        // 5. 알림 전송
+        sendNotification(newNewsList, count);
     }
 
     @Override
@@ -107,6 +122,24 @@ public class NewsServiceMonitorImpl implements NewsService{
         return new PageImpl<>(dtoList, pageable, newsPage.getTotalElements());
     }
 
+    private void sendNotification(List<News> newNewsList, int count) {
+        if (count == 1) {
+            // 단일 뉴스: 상세 페이지로 이동
+            News singleNews = newNewsList.get(0);
+            notificationPushService.sendNotificationAsync(
+                    "이거아냥?",
+                    singleNews.createNotificationTitle(),
+                    singleNews.createDetailUrl());
+        } else {
+            // 여러 뉴스: 목록 페이지로 이동
+            News latestNews = newNewsList.get(0);
+            notificationPushService.sendNotificationAsync(
+                    "이거아냥?",
+                    latestNews.createMultipleNewsNotificationBody(count),
+                    News.getNewsListUrl());
+        }
+    }
+
     // Pageable 객체 생성
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
@@ -116,4 +149,5 @@ public class NewsServiceMonitorImpl implements NewsService{
         Sort sorting = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
         return PageRequest.of(page, size, sorting);
     }
+
 }

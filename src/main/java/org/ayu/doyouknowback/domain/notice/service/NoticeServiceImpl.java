@@ -2,7 +2,8 @@ package org.ayu.doyouknowback.domain.notice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
@@ -26,7 +27,14 @@ import java.util.List;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeRepository noticeRepository;
-    private final FcmService fcmService;
+    private final NotificationPushService notificationPushService;
+
+    public NoticeServiceImpl(
+            NoticeRepository noticeRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.noticeRepository = noticeRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     // 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
     @Override
@@ -139,14 +147,14 @@ public class NoticeServiceImpl implements NoticeService {
         if (count == 1) {
             // 단일 공지: 상세 페이지로 이동
             Notice singleNotice = newNoticesList.get(0);
-            fcmService.sendNotificationToAllExpoWithUrl(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     singleNotice.createNotificationTitle(),
                     singleNotice.createDetailUrl());
         } else {
             // 여러 공지: 목록 페이지로 이동
             Notice latestNotice = newNoticesList.get(0);
-            fcmService.sendNotificationToAllExpoWithUrl(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     latestNotice.createMultipleNoticesNotificationBody(count),
                     Notice.getNoticeListUrl());

@@ -1,6 +1,5 @@
 package org.ayu.doyouknowback.domain.news.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
@@ -19,7 +18,7 @@ public class NewsController {
 
     private final NewsService newsService;
 
-    public NewsController(@Qualifier("newsProduct") NewsService newsService){
+    public NewsController(@Qualifier("newsMonitor") NewsService newsService){
         this.newsService = newsService;
     }
 

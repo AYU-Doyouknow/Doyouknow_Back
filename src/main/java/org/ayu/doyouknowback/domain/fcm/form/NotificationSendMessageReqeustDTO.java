@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FcmSendMessageReqeustDTO {
+public class NotificationSendMessageReqeustDTO {
     private String title;
     private String body;
 }
