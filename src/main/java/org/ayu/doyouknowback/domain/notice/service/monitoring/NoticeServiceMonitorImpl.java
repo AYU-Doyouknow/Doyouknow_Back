@@ -1,20 +1,16 @@
-package org.ayu.doyouknowback.domain.notice.service;
+package org.ayu.doyouknowback.domain.notice.service.monitoring;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Pageable;
+import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.global.monitoring.Monitored;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,29 +18,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Service("noticeProduct")
+@Service("noticeMonitor")
 @RequiredArgsConstructor
-public class NoticeServiceImpl implements NoticeService {
-
+public class NoticeServiceMonitorImpl implements NoticeService {
     private final NoticeRepository noticeRepository;
-    private final NotificationPushService notificationPushService;
+    private final NoticeMonitorHelper noticeHelper;
 
-    public NoticeServiceImpl(
-            NoticeRepository noticeRepository,
-            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
-        this.noticeRepository = noticeRepository;
-        this.notificationPushService = notificationPushService;
-    }
-
-    // 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
     @Override
     @Transactional
+    @Monitored("TOTAL")
     public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList) {
 
-        // 1. DB에서 최근 5개 공지사항 조회
-        List<Notice> latestNotices = noticeRepository.findTop5ByOrderByIdDesc();
+        // 1. DB 에서 최근 5개 공지사항 조회 (AOP 자동 측정)
+        List<Notice> latestNotices = noticeHelper.findTop5Notice();
 
-        log.info("========DB에서 불러온 최근 5개의 공지사항========");
         for (Notice notice : latestNotices) {
             log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
         }
@@ -67,11 +54,12 @@ public class NoticeServiceImpl implements NoticeService {
             return;
         }
 
-        // 4. 데이터 저장
-        noticeRepository.saveAll(newNoticesList);
+        // 4. 데이터 저장 (AOP 자동 측정)
+        noticeHelper.saveNotice(newNoticesList);
 
-        // 5. 알림 전송
-        sendNotification(newNoticesList, count);
+        // 5. 알림 전송 (AOP 자동 측정)
+        noticeHelper.sendNotification(newNoticesList, count);
+
     }
 
     // 전체 공지 목록 페이징 조회
@@ -140,25 +128,6 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
-    }
-
-    // 알림 전송 - Entity의 도메인 로직 활용
-    private void sendNotification(List<Notice> newNoticesList, int count) {
-        if (count == 1) {
-            // 단일 공지: 상세 페이지로 이동
-            Notice singleNotice = newNoticesList.get(0);
-            notificationPushService.sendNotificationAsync(
-                    "이거아냥?",
-                    singleNotice.createNotificationTitle(),
-                    singleNotice.createDetailUrl());
-        } else {
-            // 여러 공지: 목록 페이지로 이동
-            Notice latestNotice = newNoticesList.get(0);
-            notificationPushService.sendNotificationAsync(
-                    "이거아냥?",
-                    latestNotice.createMultipleNoticesNotificationBody(count),
-                    Notice.getNoticeListUrl());
-        }
     }
 
     // Pageable 객체 생성
