@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.ayu.doyouknowback.domain.fcm.form.NotificationTokenRequestDTO;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,14 @@ public class Notification {
     private Token token;
 
     private String platform;
+
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     // DTO -> Entity 변환
     public static Notification toSaveEntity(NotificationTokenRequestDTO fcmTokenRequestDTO) {
