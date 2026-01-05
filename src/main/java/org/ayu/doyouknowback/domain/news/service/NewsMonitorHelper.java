@@ -2,7 +2,8 @@ package org.ayu.doyouknowback.domain.news.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.news.domain.News;
 import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
@@ -12,11 +13,17 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NewsMonitorHelper {
 
     private final NewsRepository newsRepository;
-    private final FcmService fcmService;
+    private final NotificationPushService notificationPushService;
+
+    public NewsMonitorHelper(
+            NewsRepository newsRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.newsRepository = newsRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Monitored("DB_READ")
     public List<News> findTop5News() {
@@ -40,13 +47,13 @@ public class NewsMonitorHelper {
     public void sendNotification(List<News> newNewsList, int count) {
         if (count == 1) {
             News singleNews = newNewsList.get(0);
-            fcmService.sendNotificationAsync(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     singleNews.createNotificationTitle(),
                     singleNews.createDetailUrl());
         } else {
             News latestNews = newNewsList.get(0);
-            fcmService.sendNotificationAsync(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     latestNews.createMultipleNewsNotificationBody(count),
                     News.getNewsListUrl());

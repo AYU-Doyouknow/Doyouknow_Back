@@ -1,12 +1,12 @@
 package org.ayu.doyouknowback.notice.service;
 
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.ayu.doyouknowback.domain.notice.service.NoticeServiceImpl;
+import org.ayu.doyouknowback.domain.notice.service.implement.NoticeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class NoticeServiceImplTest {
     private NoticeRepository noticeRepository;
 
     @Mock
-    private FcmService fcmService;
+    private NotificationPushService fcmService;
 
     @InjectMocks
     private NoticeServiceImpl noticeService;
@@ -133,7 +133,7 @@ class NoticeServiceImplTest {
         ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(fcmService, times(1)).sendNotificationToAllExpoWithUrl(
+        verify(fcmService, times(1)).sendNotificationAsync(
                 titleCaptor.capture(),
                 bodyCaptor.capture(),
                 urlCaptor.capture());
@@ -167,7 +167,7 @@ class NoticeServiceImplTest {
         ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 
-        verify(fcmService, times(1)).sendNotificationToAllExpoWithUrl(
+        verify(fcmService, times(1)).sendNotificationAsync(
                 titleCaptor.capture(),
                 bodyCaptor.capture(),
                 urlCaptor.capture());
@@ -206,7 +206,7 @@ class NoticeServiceImplTest {
         verify(noticeRepository, never()).saveAll(anyList());
 
         // 2. 알림 전송 호출 안 됨
-        verify(fcmService, never()).sendNotificationToAllExpoWithUrl(anyString(), anyString(), anyString());
+        verify(fcmService, never()).sendNotificationAsync(anyString(), anyString(), anyString());
     }
 
     @Test

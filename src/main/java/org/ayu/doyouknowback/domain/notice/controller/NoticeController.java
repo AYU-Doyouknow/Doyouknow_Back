@@ -1,10 +1,10 @@
 package org.ayu.doyouknowback.domain.notice.controller;
 
-import lombok.RequiredArgsConstructor;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/notice")
 public class NoticeController {
 
     private final NoticeService noticeService;
+
+    public NoticeController(@Qualifier("noticeProduct") NoticeService noticeService){
+        this.noticeService = noticeService;
+    }
 
     @GetMapping("/all") // 게시글 전체조회 ( paging 기능 구현 )
     public ResponseEntity<Page<NoticeResponseDTO>> getAllNotice(
@@ -67,9 +70,6 @@ public class NoticeController {
 
         Page<NoticeResponseDTO> noticeSearchResponseDTOList = noticeService.findAllBySearch(noticeSearchVal, page, size, sort);
 
-//        if (noticeSearchResponseDTOList.isEmpty()) {
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        } else return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
         return ResponseEntity.status(HttpStatus.OK).body(noticeSearchResponseDTOList);
     }
 

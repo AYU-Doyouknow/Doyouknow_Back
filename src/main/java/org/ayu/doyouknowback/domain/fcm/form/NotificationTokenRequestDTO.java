@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FcmTokenRequestDTO {
+public class NotificationTokenRequestDTO {
     private String token;
     private String platform;
 }
