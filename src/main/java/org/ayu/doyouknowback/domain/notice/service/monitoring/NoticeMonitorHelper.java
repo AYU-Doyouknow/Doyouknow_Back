@@ -1,9 +1,8 @@
-package org.ayu.doyouknowback.domain.notice.service;
+package org.ayu.doyouknowback.domain.notice.service.monitoring;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ayu.doyouknowback.domain.fcm.service.FcmService;
-import org.ayu.doyouknowback.domain.news.domain.News;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
 import org.ayu.doyouknowback.global.monitoring.Monitored;

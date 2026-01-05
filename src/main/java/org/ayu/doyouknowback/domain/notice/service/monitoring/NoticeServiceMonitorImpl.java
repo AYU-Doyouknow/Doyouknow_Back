@@ -1,14 +1,14 @@
-package org.ayu.doyouknowback.domain.notice.service;
+package org.ayu.doyouknowback.domain.notice.service.monitoring;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
+import org.ayu.doyouknowback.domain.notice.service.NoticeService;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Service("noticeMonitor")
 @RequiredArgsConstructor
-public class NoticeServiceMonitorImpl implements NoticeService{
+public class NoticeServiceMonitorImpl implements NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeMonitorHelper noticeHelper;
 
