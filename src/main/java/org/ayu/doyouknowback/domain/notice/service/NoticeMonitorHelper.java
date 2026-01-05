@@ -1,22 +1,28 @@
-package org.ayu.doyouknowback.domain.notice.service.monitoring;
+package org.ayu.doyouknowback.domain.notice.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NoticeMonitorHelper {
 
     private final NoticeRepository noticeRepository;
-    private final FcmService fcmService;
+    private final NotificationPushService notificationPushService;
+
+    public NoticeMonitorHelper(
+            NoticeRepository noticeRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.noticeRepository = noticeRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Monitored("DB_READ")
     public List<Notice> findTop5Notice() {
@@ -40,13 +46,13 @@ public class NoticeMonitorHelper {
     public void sendNotification(List<Notice> newNoticeList, int count) {
         if (count == 1) {
             Notice singleNotice = newNoticeList.get(0);
-            fcmService.sendNotificationAsync(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     singleNotice.createNotificationTitle(),
                     singleNotice.createDetailUrl());
         } else {
             Notice latestNotice = newNoticeList.get(0);
-            fcmService.sendNotificationAsync(
+            notificationPushService.sendNotificationAsync(
                     "이거아냥?",
                     latestNotice.createMultipleNoticesNotificationBody(count),
                     Notice.getNoticeListUrl());

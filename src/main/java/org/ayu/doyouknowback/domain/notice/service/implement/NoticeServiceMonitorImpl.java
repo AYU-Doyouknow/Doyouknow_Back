@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.domain.notice.service.monitoring;
+package org.ayu.doyouknowback.domain.notice.service.implement;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
+import org.ayu.doyouknowback.domain.notice.service.NoticeMonitorHelper;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
 import org.springframework.data.domain.*;
