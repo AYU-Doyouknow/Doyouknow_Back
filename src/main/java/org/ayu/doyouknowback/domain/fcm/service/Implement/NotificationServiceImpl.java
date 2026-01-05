@@ -22,19 +22,20 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void saveToken(NotificationTokenRequestDTO dto) {
-        Optional<Notification> optionalFcm = fcmRepository.findByToken(dto.getToken());
+        String tokenValue = dto.getToken();
+        Optional<Notification> existing = fcmRepository.findByToken(tokenValue);
 
-        if (optionalFcm.isPresent()) {
-            log.info("토큰이 이미 존재합니다: {}", dto.getToken());
+        if (existing.isPresent()) {
+            log.info("토큰 이미 존재: {}", dto.getToken());
             return;
         }
 
-        Notification fcm = Notification.builder()
+        Notification newNotification = Notification.builder()
                 .token(Token.of(dto.getToken()))
                 .platform(dto.getPlatform())
                 .build();
 
-        fcmRepository.save(fcm);
-        log.info("새 토큰 저장 완료: {} (platform: {})", dto.getToken(), dto.getPlatform());
+        fcmRepository.save(newNotification);
+        log.info("신규 토큰 저장: {} (platform: {})", dto.getToken(), dto.getPlatform());
     }
 }
