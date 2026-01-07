@@ -16,14 +16,14 @@ public class BusController {
 
     private final BusService busService;
 
-    // 예: GET /api/bus/arrival?direction=ANYtoAYU
+    // 검증방법: GET /api/bus/arrival?direction=ANYtoAYU or AYU to ANY
     @GetMapping("/arrival")
     public BusResponseDTO getArrival(@RequestParam String direction) {
         return busService.getArrival(new BusRequestDTO(direction));
     }
 
-    // 예: POST /api/bus/arrivals
-    // body: [{"direction":"ANYtoAYU"},{"direction":"AYUtoANY"}]
+    // 검증방법: POST /api/bus/arrivals
+    // body 값: [{"direction":"ANYtoAYU"},{"direction":"AYUtoANY"}]
     @PostMapping("/arrivals")
     public List<BusResponseDTO> getArrivals(@RequestBody List<BusRequestDTO> requests) {
         return busService.getArrivals(requests);
