@@ -20,7 +20,7 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    public NoticeController(@Qualifier("noticeProduct") NoticeService noticeService){
+    public NoticeController(@Qualifier("noticeMonitor") NoticeService noticeService){
         this.noticeService = noticeService;
     }
 
