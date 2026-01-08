@@ -1,70 +1,68 @@
-package org.ayu.doyouknowback.domain.notice.service.implement;
+package org.ayu.doyouknowback.domain.notice.service.implement.test;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
-import org.ayu.doyouknowback.domain.notice.service.NoticeService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.exception.ResourceNotFoundException;
 import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Pageable;
+import org.ayu.doyouknowback.domain.notice.service.NoticeMonitorHelper;
+import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.global.monitoring.Monitored;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 캐시 미사용 버전 - 성능 비교용
+ * 매번 DB에서 최근 5개를 조회하여 신규 여부 판단
+ */
 @Slf4j
-@Service("noticeProduct")
-public class NoticeServiceImpl implements NoticeService {
+@Service("noticeNoCacheService")
+@RequiredArgsConstructor
+public class NoticeNoCacheService implements NoticeService {
 
     private final NoticeRepository noticeRepository;
-    private final NotificationPushService notificationPushService;
+    private final NoticeMonitorHelper noticeHelper;
 
-    public NoticeServiceImpl(
-            NoticeRepository noticeRepository,
-            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
-        this.noticeRepository = noticeRepository;
-        this.notificationPushService = notificationPushService;
-    }
-
-    // 크롤링된 공지 목록을 받아 DB에 없는 것만 저장하고, FCM 알림을 보냄
     @Override
     @Transactional
+    @Monitored("TOTAL_NO_CACHE")
     public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList) {
 
-        List<Notice> latestNotices = noticeRepository.findTop5ByOrderByIdDesc();
+        // 1. DB에서 최근 5개 공지사항 조회 (AOP로 시간 측정)
+        List<Notice> latestNotices = noticeHelper.findTop5Notice();
 
+        // 2. 크롤링된 공지를 Entity로 변환
         List<Notice> crawledNotices = Notice.fromList(noticeRequestDTOList);
 
+        // 3. 새로운 공지만 필터링
         List<Notice> newNoticesList = Notice.filterNewNotices(crawledNotices, latestNotices);
 
         int count = newNoticesList.size();
-        log.info("새로 등록될 공지사항 수 : {}", count);
+        log.info("[NO_CACHE] 새로 등록될 공지사항 수 : {}", count);
 
         if (count == 0) {
+            log.info("[NO_CACHE] 신규 공지 없음");
             return;
         }
 
-        noticeRepository.saveAll(newNoticesList);
+        // 4. 데이터 저장
+        noticeHelper.saveNotice(newNoticesList);
 
-        sendNotification(newNoticesList, count);
+        // 5. 알림 전송
+        noticeHelper.sendNotification(newNoticesList, count);
     }
 
-    // 전체 공지 목록 페이징 조회
     @Override
     @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAll(int page, int size, String sort) {
-
         Pageable pageable = createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository.findAll(pageable);
 
         List<NoticeResponseDTO> dtoList = new ArrayList<>();
@@ -75,7 +73,6 @@ public class NoticeServiceImpl implements NoticeService {
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
 
-    // 공지 상세 조회
     @Override
     @Transactional(readOnly = true)
     public NoticeDetailResponseDTO findById(Long id) {
@@ -85,13 +82,10 @@ public class NoticeServiceImpl implements NoticeService {
         return NoticeDetailResponseDTO.toDTO(notice);
     }
 
-    // 카테고리 별 공지 목록 페이징 조회
     @Override
     @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllByCategory(String category, int page, int size, String sort) {
-
         Pageable pageable = createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository.findByNoticeCategory(category, pageable);
 
         List<NoticeResponseDTO> dtoList = new ArrayList<>();
@@ -102,13 +96,10 @@ public class NoticeServiceImpl implements NoticeService {
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
 
-    // 제목/본문 검색 결과 페이징 조회
     @Override
     @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllBySearch(String noticeSearchVal, int page, int size, String sort) {
-
         Pageable pageable = createPageable(page, size, sort);
-
         Page<Notice> noticePage = noticeRepository
                 .findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
 
@@ -120,24 +111,6 @@ public class NoticeServiceImpl implements NoticeService {
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
 
-    // 알림 전송 - Entity의 도메인 로직 활용
-    private void sendNotification(List<Notice> newNoticesList, int count) {
-        if (count == 1) {
-            Notice singleNotice = newNoticesList.get(0);
-            notificationPushService.sendNotificationAsync(
-                    "이거아냥?",
-                    singleNotice.createNotificationTitle(),
-                    singleNotice.createDetailUrl());
-        } else {
-            Notice latestNotice = newNoticesList.get(0);
-            notificationPushService.sendNotificationAsync(
-                    "이거아냥?",
-                    latestNotice.createMultipleNoticesNotificationBody(count),
-                    Notice.getNoticeListUrl());
-        }
-    }
-
-    // Pageable 객체 생성
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];

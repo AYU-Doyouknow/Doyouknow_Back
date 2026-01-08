@@ -83,7 +83,7 @@ public class NotificationPushWebClientImpl implements NotificationPushService {
         // 동시 실행 수 설정
         int concurrency = 5;
 
-        log.info("푸시 전송 설정 - 총 {}개, 배치 {}개, 동시 실행 수: {}", totalCount, batchCount, concurrency);
+        //log.info("푸시 전송 설정 - 총 {}개, 배치 {}개, 동시 실행 수: {}", totalCount, batchCount, concurrency);
 
         List<Mono<Void>> batchRequests = new ArrayList<>();
 
@@ -110,9 +110,9 @@ public class NotificationPushWebClientImpl implements NotificationPushService {
 
         List<String> failedTokens = new ArrayList<>();
 
-        log.info("Expo Push 전송 완료 (WebClient)");
-        log.info("   - 배치 실행 시간: {}ms", batchExecutionTime);
-        log.info("   - 평균 배치 시간: {}ms", batchExecutionTime / batchCount);
+        //log.info("Expo Push 전송 완료 (WebClient)");
+        //log.info("   - 배치 실행 시간: {}ms", batchExecutionTime);
+        //log.info("   - 평균 배치 시간: {}ms", batchExecutionTime / batchCount);
     }
 
     private Mono<Void> sendBatchAsync(List<Map<String, Object>> batch, int batchNumber) {

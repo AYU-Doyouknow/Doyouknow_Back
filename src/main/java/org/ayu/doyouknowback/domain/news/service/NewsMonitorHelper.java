@@ -1,6 +1,5 @@
 package org.ayu.doyouknowback.domain.news.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,12 +27,7 @@ public class NewsMonitorHelper {
     @Monitored("DB_READ")
     public List<News> findTop5News() {
         List<News> latestNews = newsRepository.findTop5ByOrderByIdDesc();
-
-        log.info("========DB에서 불러온 최근 5개의 학교소식========");
-        for (News news : latestNews) {
-            log.info("id : {}, title : {}", news.getId(), news.getNewsTitle());
-        }
-
+        log.info("[DB_READ] DB에서 최근 5개 뉴스 조회 - {}개", latestNews.size());
         return latestNews;
     }
 
@@ -62,3 +56,4 @@ public class NewsMonitorHelper {
         log.info("푸시 알림 비동기 큐잉 완료 (백그라운드 실행 중)");
     }
 }
+
