@@ -6,7 +6,7 @@ import org.ayu.doyouknowback.domain.news.form.NewsDetailResponseDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
-import org.ayu.doyouknowback.domain.news.service.Implement.NewsServiceImpl;
+import org.ayu.doyouknowback.domain.news.service.Implement.product.NewsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
