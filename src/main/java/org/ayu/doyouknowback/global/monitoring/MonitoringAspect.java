@@ -17,7 +17,7 @@ public class MonitoringAspect {
         String category = monitored.value();
         String methodName = joinPoint.getSignature().toShortString();
 
-        long startTime = System.currentTimeMillis();
+        long startTime = System.nanoTime();
         Object result = null;
         boolean success = true;
 
@@ -28,12 +28,13 @@ public class MonitoringAspect {
             success = false;
             throw e;
         }finally {
-            long endTime = System.currentTimeMillis() - startTime;
+            long elapsedNanos = System.nanoTime() - startTime;
+            double elapsedMs = elapsedNanos / 1_000_000.0;  // 나노초 → 밀리초 (소수점 포함)
 
             if(success){
-                log.info("SUCCESS [{}] {} - {}ms", category, methodName, endTime);
+                log.info("SUCCESS [{}] {} - {}ms", category, methodName, elapsedMs);
             }else{
-                log.error("FAILE [{}] {} - {}ms", category, methodName);
+                log.error("FAIL [{}] {} - {}ms", category, methodName, elapsedMs);
             }
         }
     }
