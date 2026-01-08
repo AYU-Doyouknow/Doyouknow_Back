@@ -18,7 +18,7 @@ public class NewsController {
 
     private final NewsService newsService;
 
-    public NewsController(@Qualifier("newsMonitor") NewsService newsService){
+    public NewsController(@Qualifier("newsCacheService") NewsService newsService){
         this.newsService = newsService;
     }
 
