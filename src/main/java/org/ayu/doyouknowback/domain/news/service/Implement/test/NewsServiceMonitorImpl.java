@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.domain.news.service.Implement;
+package org.ayu.doyouknowback.domain.news.service.Implement.test;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,7 @@ import org.ayu.doyouknowback.domain.news.form.NewsResponseDTO;
 import org.ayu.doyouknowback.domain.news.repository.NewsRepository;
 import org.ayu.doyouknowback.domain.news.service.NewsMonitorHelper;
 import org.ayu.doyouknowback.domain.news.service.NewsService;
+import org.ayu.doyouknowback.global.cache.CacheConfig;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -25,36 +26,41 @@ public class NewsServiceMonitorImpl implements NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsMonitorHelper newsHelper;
+    private final CacheConfig cacheService;
 
     @Override
     @Transactional
     @Monitored("TOTAL")
     public void saveLatestNews(List<NewsRequestDTO> newsRequestDTOList) {
 
-        // 1. DB에서 최근 5개 뉴스 조회 (AOP 자동 측정)
-        List<News> latestNews = newsHelper.findTop5News();
+        // 1. 캐시에서 마지막 저장된 ID 조회 (DB 조회 없이 O(1))
+        Long lastSavedId = cacheService.getNewsLastId();
+        log.info("캐시에서 조회한 lastNewsId: {}", lastSavedId);
 
-        log.info("========크롤링으로 불러온 최근 5개의 학교소식========");
-        for (NewsRequestDTO news : newsRequestDTOList) {
-            log.info("id : {}, title : {}", news.getId(), news.getNewsTitle());
-        }
-
-        // 2. 크롤링된 뉴스를 Entity로 변환
-        List<News> crawledNews = News.fromList(newsRequestDTOList);
-
-        // 3. 새로운 뉴스만 필터링
-        List<News> newNewsList = News.filterNewNews(crawledNews, latestNews);
+        // 2. 크롤링된 뉴스 중 신규만 필터링 (캐시 비교)
+        List<News> newNewsList = newsRequestDTOList.stream()
+                .filter(dto -> dto.getId() > lastSavedId)
+                .map(News::from)
+                .toList();
 
         int count = newNewsList.size();
-
         log.info("새로 등록될 뉴스 수 : {}", count);
 
         if (count == 0) {
+            log.info("신규 뉴스 없음 - DB 조회 스킵");
             return;
         }
 
-        // 4. 데이터 저장 (AOP 자동 측정)
+        // 3. 신규 데이터만 저장 (AOP 자동 측정)
         newsHelper.saveNews(newNewsList);
+
+        // 4. 캐시 업데이트
+        Long maxId = newNewsList.stream()
+                .mapToLong(News::getId)
+                .max()
+                .orElse(lastSavedId);
+        cacheService.setNewsLastId(maxId);
+        log.info("캐시 업데이트 완료 - 새로운 lastNewsId: {}", maxId);
 
         // 5. 알림 전송 (AOP 자동 측정)
         newsHelper.sendNotification(newNewsList, count);

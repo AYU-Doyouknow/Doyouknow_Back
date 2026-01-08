@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.domain.notice.service.implement;
+package org.ayu.doyouknowback.domain.notice.service.implement.test;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,7 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
 import org.ayu.doyouknowback.domain.notice.service.NoticeMonitorHelper;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
+import org.ayu.doyouknowback.global.cache.CacheConfig;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -24,44 +25,47 @@ import java.util.List;
 public class NoticeServiceMonitorImpl implements NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeMonitorHelper noticeHelper;
+    private final CacheConfig cacheService;
 
     @Override
     @Transactional
     @Monitored("TOTAL")
     public void saveLatestNotice(List<NoticeRequestDTO> noticeRequestDTOList) {
 
-        // 1. DB 에서 최근 5개 공지사항 조회 (AOP 자동 측정)
-        List<Notice> latestNotices = noticeHelper.findTop5Notice();
+        // 1. 캐시에서 마지막 저장된 ID 조회 (DB 조회 없이 O(1))
+        Long lastSavedId = cacheService.getNoticeLastId();
+        log.info("캐시에서 조회한 lastNoticeId: {}", lastSavedId);
 
-        for (Notice notice : latestNotices) {
-            log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
-        }
-
-        log.info("========크롤링으로 불러온 최근 5개의 공지사항========");
-        for (NoticeRequestDTO notice : noticeRequestDTOList) {
-            log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
-        }
-
-        // 2. 크롤링된 공지를 Entity로 변환
-        List<Notice> crawledNotices = Notice.fromList(noticeRequestDTOList);
-
-        // 3. 새로운 공지만 필터링
-        List<Notice> newNoticesList = Notice.filterNewNotices(crawledNotices, latestNotices);
+        // 2. 크롤링된 공지 중 신규만 필터링 (캐시 비교)
+        List<Notice> newNoticesList = noticeRequestDTOList.stream()
+                .filter(dto -> dto.getId() > lastSavedId)
+                .map(Notice::from)
+                .toList();
 
         int count = newNoticesList.size();
         log.info("새로 등록될 공지사항 수 : {}", count);
 
         if (count == 0) {
+            log.info("신규 공지 없음 - DB 조회 스킵");
             return;
         }
 
-        // 4. 데이터 저장 (AOP 자동 측정)
+        // 3. 신규 데이터만 저장 (AOP 자동 측정)
         noticeHelper.saveNotice(newNoticesList);
+
+        // 4. 캐시 업데이트
+        Long maxId = newNoticesList.stream()
+                .mapToLong(Notice::getId)
+                .max()
+                .orElse(lastSavedId);
+        cacheService.setNoticeLastId(maxId);
+        log.info("캐시 업데이트 완료 - 새로운 lastNoticeId: {}", maxId);
 
         // 5. 알림 전송 (AOP 자동 측정)
         noticeHelper.sendNotification(newNoticesList, count);
 
     }
+
 
     // 전체 공지 목록 페이징 조회
     @Override
