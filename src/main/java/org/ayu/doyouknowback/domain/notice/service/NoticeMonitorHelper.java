@@ -27,12 +27,7 @@ public class NoticeMonitorHelper {
     @Monitored("DB_READ")
     public List<Notice> findTop5Notice() {
         List<Notice> latestNotice = noticeRepository.findTop5ByOrderByIdDesc();
-
-        log.info("========DB에서 불러온 최근 5개의 공지사항========");
-        for (Notice notice : latestNotice) {
-            log.info("id : {}, title : {}", notice.getId(), notice.getNoticeTitle());
-        }
-
+        log.info("[DB_READ] DB에서 최근 5개 공지사항 조회 - {}개", latestNotice.size());
         return latestNotice;
     }
 
@@ -58,6 +53,7 @@ public class NoticeMonitorHelper {
                     Notice.getNoticeListUrl());
         }
 
-        log.info("푸시 알림 비동기 큐잉 완료 (백그라운드 실행 중)");
+        log.info("푸시 알림 비동기 실행");
     }
 }
+
