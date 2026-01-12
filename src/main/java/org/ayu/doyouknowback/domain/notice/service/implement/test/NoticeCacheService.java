@@ -113,7 +113,7 @@ public class NoticeCacheService implements NoticeService {
         Pageable pageable = createPageable(page, size, sort);
 
         // DB 검색은 Helper에서 수행(= AOP 측정 대상)
-        Page<Notice> noticePage = noticeHelper.searchByTitleOrBody(noticeSearchVal, pageable);
+        Page<Notice> noticePage = noticeHelper.fullTextSearchByTitleOrBody(noticeSearchVal, pageable);
 
         // DTO 변환은 기존대로(측정 범위 밖)
         List<NoticeResponseDTO> dtoList = new ArrayList<>();

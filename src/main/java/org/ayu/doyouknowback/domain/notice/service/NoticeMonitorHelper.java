@@ -50,6 +50,30 @@ public class NoticeMonitorHelper {
         return page;
     }
 
+    // 검색 쿼리(DB)만 측정
+    @Monitored("DB_FULLTEXT_SEARCH")
+    public Page<Notice> fullTextSearchByTitleOrBody(String keyword, Pageable pageable) {
+
+        // (선택) 1글자 검색 정책
+        // ngram_token_size=2면 keyword 길이가 1일 때 매칭이 거의 안 나올 수 있음.
+        // 정책1) 1글자면 예외/빈 결과
+        // 정책2) 1글자면 LIKE로 fallback(성능은 포기)
+        // 여기선 정책을 명확히 하기 위해 최소 길이 제한 예시를 둠.
+        if (keyword == null || keyword.isBlank()) {
+            return Page.empty(pageable);
+        }
+
+        String q = keyword.trim();
+
+        Page<Notice> page = noticeRepository.searchByFullText(q, pageable);
+
+        log.info("[DB_SEARCH] FULLTEXT keyword='{}', returned={} / total={}",
+                keyword, page.getNumberOfElements(), page.getTotalElements());
+
+        return page;
+    }
+
+
     @Monitored("PUSH_NOTIFICATION")
     public void sendNotification(List<Notice> newNoticeList, int count) {
         if (count == 1) {
