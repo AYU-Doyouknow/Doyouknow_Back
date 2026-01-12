@@ -111,9 +111,11 @@ public class NoticeCacheService implements NoticeService {
     @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllBySearch(String noticeSearchVal, int page, int size, String sort) {
         Pageable pageable = createPageable(page, size, sort);
-        Page<Notice> noticePage = noticeRepository
-                .findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
 
+        // DB 검색은 Helper에서 수행(= AOP 측정 대상)
+        Page<Notice> noticePage = noticeHelper.searchByTitleOrBody(noticeSearchVal, pageable);
+
+        // DTO 변환은 기존대로(측정 범위 밖)
         List<NoticeResponseDTO> dtoList = new ArrayList<>();
         for (Notice notice : noticePage.getContent()) {
             dtoList.add(NoticeResponseDTO.toDTO(notice));
@@ -121,6 +123,7 @@ public class NoticeCacheService implements NoticeService {
 
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
+
 
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");

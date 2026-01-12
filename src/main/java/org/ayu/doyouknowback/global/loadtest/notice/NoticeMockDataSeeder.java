@@ -1,4 +1,4 @@
-package org.ayu.doyouknowback.global.loadtest;
+package org.ayu.doyouknowback.global.loadtest.notice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

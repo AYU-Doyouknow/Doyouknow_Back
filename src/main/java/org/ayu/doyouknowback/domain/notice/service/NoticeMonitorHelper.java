@@ -6,6 +6,7 @@ import org.ayu.doyouknowback.domain.notice.domain.Notice;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
 import org.ayu.doyouknowback.global.monitoring.Monitored;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,6 +36,18 @@ public class NoticeMonitorHelper {
     public void saveNotice(List<Notice> newNoticeList) {
         noticeRepository.saveAll(newNoticeList);
         log.info("공지사항 {}개 저장 완료", newNoticeList.size());
+    }
+
+    // 검색 쿼리(DB)만 측정
+    @Monitored("DB_SEARCH")
+    public Page<Notice> searchByTitleOrBody(String keyword, Pageable pageable) {
+        Page<Notice> page = noticeRepository
+                .findByNoticeTitleContainingOrNoticeBodyContaining(keyword, keyword, pageable);
+
+        log.info("[DB_SEARCH] keyword='{}', returned={} / total={}",
+                keyword, page.getNumberOfElements(), page.getTotalElements());
+
+        return page;
     }
 
     @Monitored("PUSH_NOTIFICATION")
