@@ -59,28 +59,13 @@ for i in range(len(html_news) - 1, 0, -1):
             html_text_2 = requests.get(news_url)
             html_2 = BeautifulSoup(html_text_2.text, "html.parser")
 
-            download_html = html_2.select_one(".b-file-box > ul")
-            if download_html:
-                download_items = download_html.find_all("li")
-                download_link = ""
-                download_title = ""
-                for item in download_items:
-                    a_tag = item.find("a")
-                    if a_tag:
-                        file_url = build_full_url(a_tag["href"])
-                        download_link = file_url + ", " + download_link
-                        download_title = a_tag.text.strip() + ", " + download_title
-            else:
-                download_link = ""
-                download_title = ""
+
 
             body = html_2.select_one(".b-content-box")
 
         except requests.RequestException as e:
             print(f"Error fetching {news_url}: {e}")
             body = None
-            download_link = ""
-            download_title = ""
 
         news_list.append(
             {
@@ -90,8 +75,6 @@ for i in range(len(html_news) - 1, 0, -1):
                 "newsUrl": str(news_url),
                 "newsDate": str(date),
                 "newsBody": str(body),
-                "newsDownloadLink": str(download_link),
-                "newsDownloadTitle": str(download_title),
             }
         )
 

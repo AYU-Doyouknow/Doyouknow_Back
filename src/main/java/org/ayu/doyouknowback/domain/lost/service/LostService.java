@@ -1,7 +1,8 @@
 package org.ayu.doyouknowback.domain.lost.service;
 
 import lombok.RequiredArgsConstructor;
-import org.ayu.doyouknowback.domain.fcm.service.FcmService;
+import org.ayu.doyouknowback.domain.fcm.service.NotificationPushService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.ayu.doyouknowback.domain.lost.domain.Lost;
 import org.ayu.doyouknowback.domain.lost.form.LostDetailResponseDTO;
 import org.ayu.doyouknowback.domain.lost.form.LostRequestDTO;
@@ -14,43 +15,35 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class LostService {
 
     private final LostRepository lostRepository;
-    private final FcmService fcmService;
+    private final NotificationPushService notificationPushService;
 
-//    @Transactional(readOnly = true)
-//    //jpa는 자동적으로 변경감지를 수행해서 엔티티의 변경 여부를 감시한다.
-//    //readOnly=true를 사용하면 변경 감지가 비활성화 되어 성능이 향상된다.
-//    public List<LostResponseDTO> getAll() {
-//        List<Lost> lostEntityList = lostRepository.findAll();
-//        List<LostResponseDTO> lostResponseList = new ArrayList<>();
-//
-//        for(Lost lost : lostEntityList){
-//            lostResponseList.add(LostResponseDTO.fromEntity(lost));
-//        }
-//
-//        return lostResponseList;
-//    }
+    public LostService(
+            LostRepository lostRepository,
+            @Qualifier("webClientPushService") NotificationPushService notificationPushService) {
+        this.lostRepository = lostRepository;
+        this.notificationPushService = notificationPushService;
+    }
 
     @Transactional(readOnly = true)
-    public Page<LostResponseDTO> getAll(int page, int size, String sort){
+    public Page<LostResponseDTO> getAll(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
 
         // Sort.Direction.fromString(desc) => Sort.Direction.DESC로 변환
         // Sort.by(Sort.Direction.DESC, "id") => id별로 내림차순 정렬
         Sort sorting = Sort.by(Sort.Direction.fromString(sortParams[1]), sortParams[0]);
 
-        //페이지 객체 생성
+        // 페이지 객체 생성
         Pageable pageable = PageRequest.of(page, size, sorting);
 
-        //페이지 담고
+        // 페이지 담고
         Page<Lost> lostEntity = lostRepository.findAll(pageable);
 
         // dto -> entity 변환
         List<LostResponseDTO> lostDTO = new ArrayList<>();
-        for(Lost lost : lostEntity){
+        for (Lost lost : lostEntity) {
             lostDTO.add(LostResponseDTO.fromEntity(lost));
         }
 
@@ -64,7 +57,7 @@ public class LostService {
         Page<Lost> lostEntity = lostRepository.findByLostTitleContainingOrLostBodyContaining(value, value, pageable);
 
         List<LostResponseDTO> lostDTO = new ArrayList<>();
-        for(Lost lost : lostEntity){
+        for (Lost lost : lostEntity) {
             lostDTO.add(LostResponseDTO.fromEntity(lost));
         }
 
@@ -74,11 +67,11 @@ public class LostService {
     public LostDetailResponseDTO getfindById(Long lostId) {
         Optional<Lost> lostOptional = lostRepository.findById(lostId);
 
-        if(lostOptional.isPresent()){
+        if (lostOptional.isPresent()) {
             Lost lost = lostOptional.get();
             LostDetailResponseDTO lostDetailResponseDTO = LostDetailResponseDTO.fromEntity(lost);
             return lostDetailResponseDTO;
-        }else{
+        } else {
             return null;
         }
     }
@@ -106,11 +99,11 @@ public class LostService {
         System.out.println("새로 등록될 항목 수: " + count);
         System.out.println(count);
 
-        if(count == 1){
+        if (count == 1) {
             String title = newLost.get(0).getLostTitle();
-            fcmService.sendNotificationToAllExpo("[분실습득]", title + " 게시글이 등록되었습니다.");
+            notificationPushService.sendNotificationAsync("[분실습득]", title + " 게시글이 등록되었습니다.", null);
             saveLost(lostRequestDTOList);
-        }else if(count > 1){
+        } else if (count > 1) {
             // 가장 ID가 큰 항목 찾기
             LostRequestDTO latest = newLost.get(0);
             for (LostRequestDTO dto : newLost) {
@@ -120,9 +113,10 @@ public class LostService {
             }
 
             String title = latest.getLostTitle();
-            fcmService.sendNotificationToAllExpo("[분실습득]", title + " 외 " + (count -1) + "개 게시글이 등록되었습니다.");
+            notificationPushService.sendNotificationAsync("[분실습득]", title + " 외 " + (count - 1) + "개 게시글이 등록되었습니다.",
+                    null);
             saveLost(lostRequestDTOList);
-        }else{
+        } else {
             return;
         }
     }
@@ -132,10 +126,10 @@ public class LostService {
         return Objects.equals(db.getLostTitle(), dto.getLostTitle());
     }
 
-    private void saveLost(List<LostRequestDTO> lostRequestDTOList){
+    private void saveLost(List<LostRequestDTO> lostRequestDTOList) {
         List<Lost> lostEntity = new ArrayList<>();
 
-        for(LostRequestDTO lostRequestDTO : lostRequestDTOList){
+        for (LostRequestDTO lostRequestDTO : lostRequestDTOList) {
             lostEntity.add(Lost.toSaveEntity(lostRequestDTO));
         }
 
