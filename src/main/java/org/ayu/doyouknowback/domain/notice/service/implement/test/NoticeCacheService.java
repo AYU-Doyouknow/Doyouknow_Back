@@ -8,6 +8,7 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
+import org.ayu.doyouknowback.domain.notice.repository.projection.NoticeSummaryView;
 import org.ayu.doyouknowback.domain.notice.service.NoticeMonitorHelper;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
 import org.ayu.doyouknowback.global.cache.CacheConfig;
@@ -113,12 +114,13 @@ public class NoticeCacheService implements NoticeService {
         Pageable pageable = createPageable(page, size, sort);
 
         // DB 검색은 Helper에서 수행(= AOP 측정 대상)
-        Page<Notice> noticePage = noticeHelper.fullTextSearchByTitleOrBody(noticeSearchVal, pageable);
+        Page<NoticeSummaryView> noticePage =
+                noticeHelper.fullTextSearchSummaryByTitleOrBody(noticeSearchVal, pageable);
 
-        // DTO 변환은 기존대로(측정 범위 밖)
+        // Projection -> DTO 변환
         List<NoticeResponseDTO> dtoList = new ArrayList<>();
-        for (Notice notice : noticePage.getContent()) {
-            dtoList.add(NoticeResponseDTO.toDTO(notice));
+        for (NoticeSummaryView row : noticePage.getContent()) {
+            dtoList.add(NoticeResponseDTO.projection(row));
         }
 
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
