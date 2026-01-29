@@ -2,6 +2,7 @@ package org.ayu.doyouknowback.domain.notice.form;
 
 import lombok.*;
 import org.ayu.doyouknowback.domain.notice.domain.Notice;
+import org.ayu.doyouknowback.domain.notice.repository.projection.NoticeSummaryView;
 
 @Data
 @Builder
@@ -23,6 +24,17 @@ public class NoticeResponseDTO {
                 .noticeWriter(notice.getNoticeWriter())
                 .noticeDate(notice.getNoticeDate())
                 .noticeCategory(notice.getNoticeCategory())
+                .build();
+    }
+
+    public static NoticeResponseDTO projection(NoticeSummaryView row) {
+        // Projection -> Dto
+        return NoticeResponseDTO.builder()
+                .id(row.getId())
+                .noticeTitle(row.getNoticeTitle())
+                .noticeWriter(row.getNoticeWriter())
+                .noticeDate(row.getNoticeDate())
+                .noticeCategory(row.getNoticeCategory())
                 .build();
     }
 

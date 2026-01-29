@@ -8,6 +8,7 @@ import org.ayu.doyouknowback.domain.notice.form.NoticeDetailResponseDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeRequestDTO;
 import org.ayu.doyouknowback.domain.notice.form.NoticeResponseDTO;
 import org.ayu.doyouknowback.domain.notice.repository.NoticeRepository;
+import org.ayu.doyouknowback.domain.notice.repository.projection.NoticeSummaryView;
 import org.ayu.doyouknowback.domain.notice.service.NoticeMonitorHelper;
 import org.ayu.doyouknowback.domain.notice.service.NoticeService;
 import org.ayu.doyouknowback.global.cache.CacheConfig;
@@ -111,16 +112,20 @@ public class NoticeCacheService implements NoticeService {
     @Transactional(readOnly = true)
     public Page<NoticeResponseDTO> findAllBySearch(String noticeSearchVal, int page, int size, String sort) {
         Pageable pageable = createPageable(page, size, sort);
-        Page<Notice> noticePage = noticeRepository
-                .findByNoticeTitleContainingOrNoticeBodyContaining(noticeSearchVal, noticeSearchVal, pageable);
 
+        // DB 검색은 Helper에서 수행(= AOP 측정 대상)
+        Page<NoticeSummaryView> noticePage =
+                noticeHelper.fullTextSearchSummaryByTitleOrBody(noticeSearchVal, pageable);
+
+        // Projection -> DTO 변환
         List<NoticeResponseDTO> dtoList = new ArrayList<>();
-        for (Notice notice : noticePage.getContent()) {
-            dtoList.add(NoticeResponseDTO.toDTO(notice));
+        for (NoticeSummaryView row : noticePage.getContent()) {
+            dtoList.add(NoticeResponseDTO.projection(row));
         }
 
         return new PageImpl<>(dtoList, pageable, noticePage.getTotalElements());
     }
+
 
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
