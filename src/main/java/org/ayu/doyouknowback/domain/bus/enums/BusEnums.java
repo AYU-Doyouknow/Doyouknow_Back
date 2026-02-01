@@ -1,6 +1,6 @@
-package org.ayu.doyouknowback.domain.bus.direction;
+package org.ayu.doyouknowback.domain.bus.enums;
 
-public enum BusDirection {
+public enum BusEnums {
     ANYtoAYU("208000069", "241253001", "10", "안양역"),
     AYUtoANY("208000299", "241253001", "25", "안양대학교");
 
@@ -9,7 +9,7 @@ public enum BusDirection {
     private final String staOrder;
     private final String stationName;
 
-    BusDirection(String stationId, String routeId, String staOrder, String stationName) {
+    BusEnums(String stationId, String routeId, String staOrder, String stationName) {
         this.stationId = stationId;
         this.routeId = routeId;
         this.staOrder = staOrder;

@@ -1,6 +1,7 @@
 package org.ayu.doyouknowback.domain.bus.service;
 
-import org.ayu.doyouknowback.domain.bus.direction.BusDirection;
+import lombok.extern.slf4j.Slf4j;
+import org.ayu.doyouknowback.domain.bus.enums.BusEnums;
 import org.ayu.doyouknowback.domain.bus.form.BusRequestDTO;
 import org.ayu.doyouknowback.domain.bus.form.BusResponseDTO;
 
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
+import org.ayu.doyouknowback.global.cache.BusCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +27,16 @@ import java.util.List;
 
 /**
  * 버스 도착 정보를 관리하는 서비스 클래스
- * 1. 유저의 요청에는 서버 메모리(Cache)에 저장된 최신 데이터를 즉시 반환 (속도 및 API 쿼터 절약)
+ * 1. 유저의 요청에는 서버 메모리(Cache)에 저장된 최신 데이터를 즉시 반환
  * 2. 스케줄러 등을 통해 주기적으로 외부 공공데이터 API를 호출하여 캐시를 갱신하는 구조
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BusService {
 
     // 인메모리 캐시 저장소 (ConcurrentHashMap 등을 활용한 로컬 캐시) 추후 요청이 많아지거나 2대로 서버를 나눌 시 redis 사용
-    private final BusArrivalCache cache;
+    private final BusCache cache;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -45,18 +48,17 @@ public class BusService {
     @Value("${bus.key}")
     private String serviceKey;
 
-    /**
-     * [유저용 API 로직]
-     * 캐시에 저장된 버스 도착 정보를 조회합니다.
-     * 외부 API를 직접 호출하지 않으므로 매우 빠른 응답 속도를 보장.
-     * * @param request 유저가 보낸 방향 정보 (ANYtoAYU 등)
-     * @return 캐시된 버스 정보 또는 데이터 없음 에러 메시지
+    /*
+      캐시에 저장된 버스 도착 정보를 조회합니다.
+      외부 API를 직접 호출하지 않으므로 매우 빠른 응답 속도를 보장.
+      @param request 유저가 보낸 방향 정보 (ANYtoAYU 등)
+      @return 캐시된 버스 정보 또는 데이터 없음 에러 메시지
      */
     public BusResponseDTO getArrival(BusRequestDTO request) {
-        BusDirection dir;
+        BusEnums dir;
         try {
             // 요청받은 문자열을 Enum 상수로 변환 (ANYtoAYU / AYUtoANY)
-            dir = BusDirection.valueOf(request.direction());
+            dir = BusEnums.valueOf(request.direction());
         } catch (Exception e) {
             return BusResponseDTO.builder()
                     .success(false)
@@ -65,7 +67,7 @@ public class BusService {
         }
 
         // 1. 캐시에서 해당 방향의 데이터(Entry)를 가져옴
-        BusArrivalCache.Entry entry = cache.get(dir);
+        BusCache.Entry entry = cache.get(dir);
 
         // 2. 캐시 데이터가 없으면(서버 가동 직후 등) 실패 응답 반환
         if (entry == null) {
@@ -106,7 +108,7 @@ public class BusService {
      * * @param dir 조회할 버스 노선 및 정류장 정보
      * @return API로부터 받아온 가공된 버스 정보 DTO
      */
-    public BusResponseDTO fetchFromPublicApi(BusDirection dir) {
+    public BusResponseDTO fetchFromPublicApi(BusEnums dir) {
         HttpURLConnection conn = null;
         try {
             // 1. API 요청 URL 생성
@@ -149,8 +151,10 @@ public class BusService {
             String locationNo = target.path("locationNo1").asText("");     // 몇 정거장 전
             String predictTime = target.path("predictTime1").asText("");   // 남은 시간 (분)
             String formattedTimeSec = target.path("predictTimeSec1").asText(""); // 남은 시간 (초)
-
+            String updatedKst = Instant.now().atZone(KST).format(KST_FMT);
             // 7. 성공 응답 생성
+            log.info("[BUS-API] 성공 | 정거장: {} | 위치: {}전 | 남은시간: {}분({}초) | 갱신: {}",
+                    dir.stationName(), locationNo, predictTime, formattedTimeSec, updatedKst);
             return BusResponseDTO.builder()
                     .stationName(dir.stationName())
                     .locationNo(locationNo)
@@ -172,8 +176,8 @@ public class BusService {
         }
     }
 
-    /**
-     * 공공데이터 API 호출을 위한 쿼리 파라미터 조합 메서드
+    /*
+      공공데이터 API 호출을 위한 쿼리 파라미터 조합 메서드
      */
     private String buildUrl(String stationId, String routeId, String staOrder) throws Exception {
         // 서비스 키가 이미 인코딩되어 있는지 확인 후 처리
