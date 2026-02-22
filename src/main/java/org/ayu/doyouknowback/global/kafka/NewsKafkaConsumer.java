@@ -1,7 +1,6 @@
 package org.ayu.doyouknowback.global.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ayu.doyouknowback.domain.news.form.NewsRequestDTO;
 import org.ayu.doyouknowback.domain.news.service.NewsService;
@@ -13,12 +12,15 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NewsKafkaConsumer {
 
-    @Qualifier("newsCacheService")
     private final NewsService newsService;
     private final ObjectMapper objectMapper;
+
+    public NewsKafkaConsumer(@Qualifier("newsCacheService") NewsService newsService, ObjectMapper objectMapper) {
+        this.newsService = newsService;
+        this.objectMapper = objectMapper;
+    }
 
     @KafkaListener(topics = "news.crawled", groupId = "doyouknow-backend")
     public void consume(String message) {
