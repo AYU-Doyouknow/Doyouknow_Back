@@ -114,9 +114,9 @@ for i in range(len(html_notice) - 1, 0, -1):
         }
     )
 
-# 내림차순 정렬 (id 기준)
-notice_list.sort(key=lambda x: int(x["id"]), reverse=True)
-notice_list = notice_list[:5]
+# 오름차순 정렬 (id 기준) - Consumer 캐시 비교(id > lastSavedId)를 위해 작은 id부터 전송
+notice_list.sort(key=lambda x: int(x["id"]))
+notice_list = notice_list[-5:]
 
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP,
