@@ -1,7 +1,6 @@
 import subprocess
 import sys
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
 
 scheduler = BlockingScheduler(timezone="Asia/Seoul")
 
@@ -25,14 +24,16 @@ def run_news_crawler():
 # 공지사항: 평일 9~18시 매 30분 (기존 Spring @Scheduled와 동일)
 scheduler.add_job(
     run_notice_crawler,
-    CronTrigger(minute="0,30", hour="9-18", day_of_week="mon-fri"),
+    "cron",
+    minute="0,30", hour="9-18", day_of_week="mon-fri",
     id="notice_crawler",
 )
 
 # 뉴스: 평일 9시, 13시, 17시 (기존 Spring @Scheduled와 동일)
 scheduler.add_job(
     run_news_crawler,
-    CronTrigger(hour="9,13,17", day_of_week="mon-fri"),
+    "cron",
+    hour="9,13,17", day_of_week="mon-fri",
     id="news_crawler",
 )
 
